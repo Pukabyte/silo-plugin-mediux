@@ -14,6 +14,12 @@ Metadata requests use `https://images.mediux.io/graphql` with an `Authorization:
 
 The API contract was tested with authenticated requests and isolated native SDK calls. Mediux's GraphQL schema is a dependency that may change. This plugin does not claim an official provider compatibility guarantee or depend on the Mediux container's private routes.
 
+Movie requests retrieve standalone sets and movie-specific collection posters
+and backdrops in one GraphQL call. Collection assets retain their set, creator,
+popularity, language and modification version, then share the existing selection
+and cache paths. Assets must identify the requested movie; collection covers and
+other movies' artwork are excluded.
+
 API responses are bounded, requests have cancellation/timeouts, redirects are rejected, and concurrency is limited. The metadata cache holds at most 128 bundles, coalesces duplicate in-flight requests, expires empty results sooner, and uses configuration generations so older requests cannot repopulate a new configuration's cache. Configuration changes invalidate the cache. Cache bounds count entries, not decoded bytes; large titles can consume substantial memory.
 
 ## Artwork references
