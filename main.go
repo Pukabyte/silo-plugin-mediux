@@ -248,7 +248,7 @@ func (p *provider) resolveTVDB(ctx context.Context, typ, tvdb string) (string, e
 }
 
 const showQuery = `query($tmdb_id: ID!){shows_by_id(id:$tmdb_id){id show_sets(limit:-1){ id popularity user_created{username} show_poster(limit:-1){id modified_on language{display_name}} show_backdrop(limit:-1){id modified_on language{display_name}} season_posters(limit:-1){ id modified_on language{display_name} season{season_number}} titlecards(limit:-1){id modified_on language{display_name} episode{episode_number season_id{season_number}}} files(limit:-1){ id file_type modified_on language{display_name} }}}}`
-const movieQuery = `query($tmdb_id: ID!){movies_by_id(id:$tmdb_id){id movie_sets(limit:-1){id popularity user_created{username} movie_poster(limit:-1){id modified_on language{display_name}} movie_backdrop(limit:-1){id modified_on language{display_name}} files(limit:-1){id file_type modified_on language{display_name}}}}}`
+const movieQuery = `query($tmdb_id: ID!){movies_by_id(id:$tmdb_id){id movie_sets(limit:-1){id popularity user_created{username} movie_poster(limit:-1){id modified_on language{display_name}} movie_backdrop(limit:-1){id modified_on language{display_name}} files(limit:-1){id file_type modified_on language{display_name}}} posters(limit:-1,filter:{collection_set:{id:{_nnull:true}}}){id modified_on language{display_name} movie{id} collection_set{id popularity user_created{username}}} backdrops(limit:-1,filter:{collection_set:{id:{_nnull:true}}}){id modified_on language{display_name} movie{id} collection_set{id popularity user_created{username}}}}}`
 
 func (p *provider) fetch(ctx context.Context, typ, id string) (bundle, error) {
 	cfg := p.snapshot()
@@ -433,6 +433,13 @@ func parseBundle(raw json.RawMessage, typ, expectedID string) (bundle, error) {
 			}
 		}
 		b.Sets = append(b.Sets, s)
+	}
+	if typ == "movie" {
+		collections, err := movieCollectionSets(item, expectedID)
+		if err != nil {
+			return bundle{}, err
+		}
+		b.Sets = append(b.Sets, collections...)
 	}
 	return b, nil
 }

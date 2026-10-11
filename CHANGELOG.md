@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.9
+
+- Include movie posters and backdrops from collection sets in creator-priority selection and manual galleries, using the same cached movie request.
+
 ## 0.1.8
 
 - Show all eligible Mediux artwork in Silo's manual image picker while retaining automatic best-image selection for refreshes.
