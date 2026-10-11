@@ -7,24 +7,33 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: plugin-release
+  cancel-in-progress: false
+
 jobs:
   checks:
     uses: ./.github/workflows/ci.yml
 
   publish:
     needs: checks
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
     env:
       GOWORK: 'off'
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
         with:
           go-version-file: go.mod
       - name: Build checksum-bearing assets
         run: python3 tools/package.py --version "${GITHUB_REF_NAME#v}"
+      - name: Generate install repository index
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          python3 tools/generate_index.py --repo "$GITHUB_REPOSITORY" --version "$version" \
+            --dist-dir "dist/$version" --output "dist/$version/index.json"
       - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -32,3 +41,65 @@ jobs:
           version="${GITHUB_REF_NAME#v}"
           gh release create "$GITHUB_REF_NAME" "dist/$version/"* \
             --verify-tag --title "Mediux Artwork $version" --generate-notes
+
+  install-index:
+    needs: publish
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: main
+      - name: Publish released index on main
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          current=$(python3 -c 'import json; print(json.load(open("manifest.json"))["version"])')
+          if [ "$current" != "$version" ]; then
+            echo "::notice::Main has moved to another version; release asset index remains available."
+            exit 0
+          fi
+          gh release download "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" \
+            --pattern index.json --dir "$RUNNER_TEMP/mediux-index"
+          cp "$RUNNER_TEMP/mediux-index/index.json" index.json
+          git add index.json
+          if git diff --cached --quiet; then exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: publish install index for $GITHUB_REF_NAME"
+          git push origin HEAD:main
+
+  notify-community-catalog:
+    needs: install-index
+    if: github.repository == 'Silo-Community/silo-plugin-mediux'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Dispatch approved release to community catalog
+        env:
+          GH_TOKEN: ${{ secrets.SILO_PLUGINS_DISPATCH_TOKEN }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::warning::SILO_PLUGINS_DISPATCH_TOKEN is unset; use the catalog's manual Update Catalog workflow after approval."
+            exit 0
+          fi
+          python3 - <<'PYTHON'
+          import json, os, pathlib, urllib.request
+          url = 'https://raw.githubusercontent.com/Silo-Community/silo-plugins/main/approved-plugins.json'
+          with urllib.request.urlopen(url, timeout=20) as response:
+              registry = json.load(response)
+          repo = os.environ['GITHUB_REPOSITORY']
+          approved = any(p['repository'].lower() == repo.lower() and p['plugin_id'] == 'community.mediux'
+                         for p in registry['plugins'])
+          if not approved:
+              print('::notice::Repository is not approved; skipping community catalog dispatch.')
+              raise SystemExit(0)
+          payload = {'event_type': 'plugin_release_published',
+                     'client_payload': {'repo': repo, 'tag': os.environ['GITHUB_REF_NAME']}}
+          pathlib.Path(os.environ['RUNNER_TEMP'], 'catalog-dispatch.json').write_text(json.dumps(payload))
+          PYTHON
+          if [ -f "$RUNNER_TEMP/catalog-dispatch.json" ]; then
+            gh api --method POST repos/Silo-Community/silo-plugins/dispatches \
+              --input "$RUNNER_TEMP/catalog-dispatch.json"
+          fi

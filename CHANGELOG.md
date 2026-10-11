@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.7
+
+- Add a Silo repository index for normal plugin installation and update discovery without manual ZIP downloads.
+- Upgrade Go to 1.26.9, `golang.org/x/net` to 0.60.0, and gRPC to 1.83.2 to resolve published security advisories. The Silo SDK remains v0.24.0.
+- Add vulnerability auditing and reproducible archive checks to CI; update pinned GitHub Actions.
+- Add the standard community catalog release dispatch, gated on organization ownership and approval.
+
+
 ## 0.1.6
 
 Initial public release. Includes native Mediux metadata enrichment and image resolution, ordered creator search/preferences, independent season and title-card consistency policies, configurable gap handling, and Silo-themed administrator settings.

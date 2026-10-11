@@ -6,7 +6,15 @@ Metadata requests go directly to Mediux's GraphQL API with your saved token. Ima
 
 ## Install
 
-Download the ZIP matching your Silo server from [GitHub Releases](https://github.com/Pukabyte/silo-plugin-mediux/releases). Upload it through Silo's administrator plugin page, then enable **Mediux Artwork**.
+In Silo's administrator plugin page, add this repository URL:
+
+```text
+https://raw.githubusercontent.com/Pukabyte/silo-plugin-mediux/main/index.json
+```
+
+Refresh the repository, install **Mediux Artwork**, then enable it. Silo downloads the matching platform binary and verifies its SHA-256 checksum. The source `manifest.json` describes the plugin; it is not an install repository index.
+
+This custom repository supports normal installation and update discovery while community approval is pending. ZIP uploads remain available for offline installations.
 
 1. Save your Mediux API token in the plugin's standard settings form.
 2. Add Mediux to the applicable movie, series, season, and episode provider chains. Put it early when it should supply artwork. Keep other providers for text and IDs.
@@ -64,12 +72,12 @@ See [DESIGN.md](DESIGN.md) for implementation details.
 Use the Go version declared in `go.mod`. No local SDK replacement is required.
 
 ```sh
-GOWORK=off make test vet build
+GOWORK=off make check audit build
 python3 tools/package.py
-go run ./tools/smoke "$(pwd)/dist/0.1.6/plugin-linux-amd64" 0.1.6
+go run ./tools/smoke "$(pwd)/dist/0.1.7/plugin-linux-amd64" 0.1.7
 ```
 
-Packaging builds all declared platforms, supplies checksum-bearing manifests, and writes installable ZIPs, raw binaries, and `checksums.txt` under `dist/<version>/`.
+CI also checks that two Linux archives are byte-identical. Packaging builds all declared platforms, supplies checksum-bearing manifests, and writes installable ZIPs, raw binaries, and `checksums.txt` under `dist/<version>/`.
 
 The existing browser checks use Playwright. With Playwright and Chromium available in your development environment:
 
@@ -82,3 +90,9 @@ Optional `MEDIUX_SCREENSHOT_DIR` selects a screenshot directory. `MEDIUX_BEFORE_
 ## License
 
 [AGPL-3.0-or-later](LICENSE). Embedded Outfit is distributed under the [SIL Open Font License](OFL-Outfit.txt). This plugin is not affiliated with Mediux or the Silo project.
+
+## Community catalog integration
+
+Approval follows [Silo Community's policy](https://github.com/Silo-Community/silo-plugins/blob/main/APPROVAL_POLICY.md). Organization ownership and independent maintainer acceptance are prerequisites; this personal repository does not claim community approval. `CODEOWNERS` retains @Pukabyte as maintainer.
+
+After transfer and approval, configure `SILO_PLUGINS_DISPATCH_TOKEN` with access only to the community catalog's dispatch endpoint. Tagged releases then dispatch `plugin_release_published` to `Silo-Community/silo-plugins`. Until configured, maintainers can run that catalog's **Update Catalog** workflow manually with the repository and release tag. Release publishing and the personal install index do not require this secret.
