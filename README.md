@@ -14,7 +14,7 @@ https://raw.githubusercontent.com/Pukabyte/silo-plugin-mediux/main/index.json
 
 Refresh the repository, install **Mediux Artwork**, then enable it. Silo downloads the matching platform binary and verifies its SHA-256 checksum. The source `manifest.json` describes the plugin; it is not an install repository index.
 
-This custom repository supports normal installation and update discovery while community approval is pending. ZIP uploads remain available for offline installations.
+This custom repository supports normal installation and update discovery while community approval is pending. ZIP uploads remain available for offline installations. Existing ZIP installs are not automatically linked to this repository for updates; repository update tracking applies to installations made through the repository.
 
 1. Save your Mediux API token in the plugin's standard settings form.
 2. Add Mediux to the applicable movie, series, season, and episode provider chains. Put it early when it should supply artwork. Keep other providers for text and IDs.
@@ -95,4 +95,4 @@ Optional `MEDIUX_SCREENSHOT_DIR` selects a screenshot directory. `MEDIUX_BEFORE_
 
 Approval follows [Silo Community's policy](https://github.com/Silo-Community/silo-plugins/blob/main/APPROVAL_POLICY.md). Organization ownership and independent maintainer acceptance are prerequisites; this personal repository does not claim community approval. `CODEOWNERS` retains @Pukabyte as maintainer.
 
-After transfer and approval, configure `SILO_PLUGINS_DISPATCH_TOKEN` with access only to the community catalog's dispatch endpoint. Tagged releases then dispatch `plugin_release_published` to `Silo-Community/silo-plugins`. Until configured, maintainers can run that catalog's **Update Catalog** workflow manually with the repository and release tag. Release publishing and the personal install index do not require this secret.
+After transfer and approval, configure `SILO_PLUGINS_DISPATCH_TOKEN` as a fine-grained token limited to `Silo-Community/silo-plugins`, with the minimum permission required for repository dispatch. Tagged releases then dispatch `plugin_release_published` to `Silo-Community/silo-plugins`. Until configured, maintainers can run that catalog's **Update Catalog** workflow manually with the repository and release tag. Release publishing and the personal install index do not require this secret. Organization branch protection must permit the release bot to update only `index.json`, or maintainers must commit the released index through their required PR process. The released `index.json` asset remains available if the main-branch update is blocked.
