@@ -98,3 +98,19 @@ func TestGraphQLErrorMalformedDetailsHaveSafeFallback(t *testing.T) {
 		}
 	}
 }
+
+func TestGraphQLErrorRedactsEncodedTokensAndQuotedBearer(t *testing.T) {
+	for _, secret := range []string{
+		"private%2Ftoken%2Bvalue%3F",
+		"private%2ftoken%2bvalue%3f",
+		"private%2ftoken%2Bvalue%3f",
+		`Bearer "another-secret"`,
+		`Bearer 'another-secret'`,
+	} {
+		raw, _ := json.Marshal(map[string]any{"message": "Permission denied: " + secret})
+		got := graphqlError([]json.RawMessage{raw}, "movie artwork", "private/token+value?").Error()
+		if strings.Contains(got, "private") || strings.Contains(got, "another-secret") || !strings.Contains(got, "[REDACTED]") {
+			t.Fatalf("credential exposed for %q: %q", secret, got)
+		}
+	}
+}

@@ -9,14 +9,19 @@ import (
 	"unicode"
 )
 
-var bearerCredential = regexp.MustCompile(`(?i)\bBearer\s+[^\s"'<>,;]+`)
+var bearerCredential = regexp.MustCompile(`(?i)\bBearer\s+(?:"[^"]*"|'[^']*'|[^\s"'<>,;]+)`)
 
 // Keep actionable upstream diagnostics, never arbitrary extension data or stacks.
 func graphqlError(raw []json.RawMessage, operation, token string) error {
 	clean := func(value string) string {
 		if token != "" {
-			for _, secret := range []string{token, url.QueryEscape(token), url.PathEscape(token)} {
-				value = strings.ReplaceAll(value, secret, "[REDACTED]")
+			value = strings.ReplaceAll(value, token, "[REDACTED]")
+			for _, secret := range []string{url.QueryEscape(token), url.PathEscape(token)} {
+				if secret != token {
+					// Hex digits in percent escapes may use either case.
+					encoded := regexp.MustCompile("(?i)" + regexp.QuoteMeta(secret))
+					value = encoded.ReplaceAllLiteralString(value, "[REDACTED]")
+				}
 			}
 		}
 		value = bearerCredential.ReplaceAllString(value, "Bearer [REDACTED]")
