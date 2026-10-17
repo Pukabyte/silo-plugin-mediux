@@ -22,6 +22,13 @@ other movies' artwork are excluded.
 
 API responses are bounded, requests have cancellation/timeouts, redirects are rejected, and concurrency is limited. The metadata cache holds at most 128 bundles, coalesces duplicate in-flight requests, expires empty results sooner, and uses configuration generations so older requests cannot repopulate a new configuration's cache. Configuration changes invalidate the cache. Cache bounds count entries, not decoded bytes; large titles can consume substantial memory.
 
+GraphQL failures include the operation, upstream message, optional error code
+and field path in the returned RPC error. Only these fields are read; arbitrary
+extensions and upstream stacks are omitted. Diagnostics redact the configured
+token (including URL-encoded forms) and bearer credentials before limiting each
+detail to 512 characters and reporting at most three errors. Control characters
+are flattened so upstream content cannot inject additional log lines.
+
 ## Artwork references
 
 Canonical references have the form `mediux://<asset-id>?v=<modified-version>&quality=jpg`. The resolver validates asset UUIDs and restricts delivery to the fixed Mediux asset host. Single and batch resolver RPCs share the same behavior. Quality determines optimized or original delivery; logos retain original transparency. No metadata API token is exposed in references, HTML, creator results, or settings responses. Metadata ingestion assumes Mediux asset IDs are valid; malformed upstream IDs can produce unusable references, which the resolver rejects. Missing or invalid modification timestamps use the stable `v=0` fallback.

@@ -239,7 +239,7 @@ func (p *provider) resolveTVDB(ctx context.Context, typ, tvdb string) (string, e
 		return "", err
 	}
 	if len(out.Errors) > 0 {
-		return "", errors.New("Mediux API returned GraphQL errors")
+		return "", graphqlError(out.Errors, "TVDB "+typ+" lookup", cfg.Token)
 	}
 	if len(out.Data[entity]) == 0 {
 		return "", nil
@@ -296,7 +296,7 @@ func (p *provider) fetch(ctx context.Context, typ, id string) (bundle, error) {
 		return bundle{}, err
 	}
 	if len(g.Errors) > 0 {
-		return bundle{}, errors.New("Mediux API returned GraphQL errors")
+		return bundle{}, graphqlError(g.Errors, typ+" artwork", cfg.Token)
 	}
 	return parseBundle(g.Data, typ, id)
 }
