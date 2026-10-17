@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.10
+
+- Report Mediux GraphQL error messages, error codes and field paths for artwork requests and TVDB identity lookups, including which operation failed. Diagnostics redact the configured token and bearer credentials, omit upstream stacks, and limit output size.
+
 ## 0.1.9
 
 - Include movie posters and backdrops from collection sets in creator-priority selection and manual galleries, using the same cached movie request.
