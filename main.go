@@ -68,6 +68,7 @@ type artwork struct {
 }
 type set struct {
 	ID, Creator string
+	Title       string
 	Popularity  float64
 	Art         []artwork
 }
@@ -247,8 +248,8 @@ func (p *provider) resolveTVDB(ctx context.Context, typ, tvdb string) (string, e
 	return out.Data[entity][0].ID, nil
 }
 
-const showQuery = `query($tmdb_id: ID!){shows_by_id(id:$tmdb_id){id show_sets(limit:-1){ id popularity user_created{username} show_poster(limit:-1){id modified_on language{display_name}} show_backdrop(limit:-1){id modified_on language{display_name}} season_posters(limit:-1){ id modified_on language{display_name} season{season_number}} titlecards(limit:-1){id modified_on language{display_name} episode{episode_number season_id{season_number}}} files(limit:-1){ id file_type modified_on language{display_name} }}}}`
-const movieQuery = `query($tmdb_id: ID!){movies_by_id(id:$tmdb_id){id movie_sets(limit:-1){id popularity user_created{username} movie_poster(limit:-1){id modified_on language{display_name}} movie_backdrop(limit:-1){id modified_on language{display_name}} files(limit:-1){id file_type modified_on language{display_name}}} posters(limit:-1,filter:{collection_set:{id:{_nnull:true}}}){id modified_on language{display_name} movie{id} collection_set{id popularity user_created{username}}} backdrops(limit:-1,filter:{collection_set:{id:{_nnull:true}}}){id modified_on language{display_name} movie{id} collection_set{id popularity user_created{username}}}}}`
+const showQuery = `query($tmdb_id: ID!){shows_by_id(id:$tmdb_id){id show_sets(limit:-1){ id set_title popularity user_created{username} show_poster(limit:-1){id modified_on language{display_name}} show_backdrop(limit:-1){id modified_on language{display_name}} season_posters(limit:-1){ id modified_on language{display_name} season{season_number}} titlecards(limit:-1){id modified_on language{display_name} episode{episode_number season_id{season_number}}} files(limit:-1){ id file_type modified_on language{display_name} }}}}`
+const movieQuery = `query($tmdb_id: ID!){movies_by_id(id:$tmdb_id){id movie_sets(limit:-1){id set_title popularity user_created{username} movie_poster(limit:-1){id modified_on language{display_name}} movie_backdrop(limit:-1){id modified_on language{display_name}} files(limit:-1){id file_type modified_on language{display_name}}} posters(limit:-1,filter:{collection_set:{id:{_nnull:true}}}){id modified_on language{display_name} movie{id} collection_set{id set_title popularity user_created{username}}} backdrops(limit:-1,filter:{collection_set:{id:{_nnull:true}}}){id modified_on language{display_name} movie{id} collection_set{id set_title popularity user_created{username}}}}}`
 
 func (p *provider) fetch(ctx context.Context, typ, id string) (bundle, error) {
 	cfg := p.snapshot()
@@ -329,6 +330,7 @@ func parseBundle(raw json.RawMessage, typ, expectedID string) (bundle, error) {
 	}
 	var rows []struct {
 		ID         string  `json:"id"`
+		Title      string  `json:"set_title"`
 		Popularity float64 `json:"popularity"`
 		User       struct {
 			Username string `json:"username"`
@@ -398,7 +400,7 @@ func parseBundle(raw json.RawMessage, typ, expectedID string) (bundle, error) {
 	}
 	b := bundle{}
 	for _, r := range rows {
-		s := set{r.ID, r.User.Username, r.Popularity, nil}
+		s := set{ID: r.ID, Creator: r.User.Username, Title: r.Title, Popularity: r.Popularity}
 		add := func(id, modified, language, k string, season, episode int) {
 			if id != "" {
 				at, _ := time.Parse(time.RFC3339Nano, modified)
@@ -656,11 +658,17 @@ type server struct {
 	pluginv1.UnimplementedMetadataProviderServer
 	pluginv1.UnimplementedImageResolverServer
 	pluginv1.UnimplementedHttpRoutesServer
-	m               *pluginv1.PluginManifest
-	p               *provider
-	settingsMu      sync.Mutex
-	settingsCSRF    string
-	savePreferences func(context.Context, map[string]any) error
+	m                  *pluginv1.PluginManifest
+	p                  *provider
+	settingsMu         sync.Mutex
+	settingsCSRF       string
+	collectionKey      string
+	collectionBaseURL  func(context.Context) (string, error)
+	savePreferences    func(context.Context, map[string]any) error
+	artworkApplyKey    []byte
+	artworkApplyUsed   map[[32]byte]int64
+	setBindings        map[string]string
+	saveSetPreferences func(context.Context, map[string]string) error
 }
 
 func (s *server) GetManifest(context.Context, *pluginv1.GetManifestRequest) (*pluginv1.GetManifestResponse, error) {
@@ -671,6 +679,8 @@ func (s *server) Configure(_ context.Context, r *pluginv1.ConfigureRequest) (*pl
 	defer s.settingsMu.Unlock()
 	values := map[string]any{}
 	preferences := map[string]any{}
+	collectionConnection := map[string]any{}
+	setPreferences := map[string]any{}
 	for _, entry := range r.GetConfig() {
 		if entry.GetKey() == "settings" && entry.GetValue() != nil {
 			for k, v := range entry.GetValue().AsMap() {
@@ -679,6 +689,12 @@ func (s *server) Configure(_ context.Context, r *pluginv1.ConfigureRequest) (*pl
 		}
 		if entry.GetKey() == "artwork_preferences" && entry.GetValue() != nil {
 			preferences = entry.GetValue().AsMap()
+		}
+		if entry.GetKey() == "set_preferences" && entry.GetValue() != nil {
+			setPreferences = entry.GetValue().AsMap()
+		}
+		if entry.GetKey() == "collection_connection" && entry.GetValue() != nil {
+			collectionConnection = entry.GetValue().AsMap()
 		}
 	}
 	for _, key := range []string{"priority_creators", "excluded_creators", "only_priority_creators", "season_consistency", "titlecard_consistency", "missing_artwork", "image_selection", "quality", "cache_hours"} {
@@ -710,7 +726,27 @@ func (s *server) Configure(_ context.Context, r *pluginv1.ConfigureRequest) (*pl
 	if v, ok := values["cache_hours"].(float64); ok && (v < 0 || v > 168 || v != float64(int(v))) {
 		return nil, errors.New("cache_hours must be an integer from 0 through 168")
 	}
+	bindings := map[string]string{}
+	if raw, ok := setPreferences["bindings"].(map[string]any); ok {
+		if len(raw) > 500 {
+			return nil, errors.New("too many saved set preferences")
+		}
+		for key, value := range raw {
+			parts := strings.SplitN(key, ":", 2)
+			selected, ok := value.(string)
+			if len(parts) != 2 || !validSetType(parts[0]) || !validCollectionID(parts[1]) || (parts[0] != "collection" && (!numericID(parts[1]) || len(parts[1]) > 20)) || !ok || !collectionCoverSetID.MatchString(selected) {
+				return nil, errors.New("invalid saved set preference")
+			}
+			bindings[key] = selected
+		}
+	}
+	s.setBindings = bindings
 	s.p.configure(values)
+	if key, ok := collectionConnection["api_key"].(string); ok {
+		s.collectionKey = strings.TrimSpace(key)
+	} else {
+		s.collectionKey = ""
+	}
 	return &pluginv1.ConfigureResponse{}, nil
 }
 func (s *server) Search(context.Context, *pluginv1.SearchMetadataRequest) (*pluginv1.SearchMetadataResponse, error) {
@@ -814,6 +850,9 @@ func (s *server) GetImages(ctx context.Context, r *pluginv1.GetImagesRequest) (*
 		kind = "season"
 	}
 	cfg := s.p.snapshot()
+	if !isGalleryImageRequest(ctx) {
+		b = s.preferredBundle(typ, id, b)
+	}
 	all := cfg.Selection == "All" || isGalleryImageRequest(ctx)
 	as := s.p.selectArt(b, cfg, kind, season, episode, true)
 	if kind == "poster" {
@@ -870,6 +909,7 @@ func (s *server) GetSeasons(ctx context.Context, r *pluginv1.GetSeasonsRequest) 
 	if e != nil {
 		return nil, e
 	}
+	b = s.preferredBundle("series", id, b)
 	cfg := s.p.snapshot()
 	selection := s.p.artworkSet(b, cfg, "season", r.GetLanguage())
 	seen := map[int]bool{}
@@ -905,6 +945,7 @@ func (s *server) GetEpisodes(ctx context.Context, r *pluginv1.GetEpisodesRequest
 	}
 	sn := int(r.GetSeasonNumber())
 	o := &pluginv1.GetEpisodesResponse{}
+	b = s.preferredBundle("series", id, b)
 	cfg := s.p.snapshot()
 	selection := s.p.artworkSet(b, cfg, "still", r.GetLanguage())
 	seen := map[int]bool{}
@@ -948,12 +989,32 @@ func main() {
 			m.Checksum = hex.EncodeToString(h[:])
 		}
 	}
-	s := &server{m: m, p: newProvider(), savePreferences: func(ctx context.Context, values map[string]any) error {
+	s := &server{m: m, p: newProvider(), collectionBaseURL: func(ctx context.Context) (string, error) {
+		host := runtime.Host()
+		if host == nil {
+			return "", errors.New("Silo runtime host unavailable")
+		}
+		info, err := host.GetHostInfo(ctx)
+		if err != nil || info == nil {
+			return "", errors.New("Silo host information unavailable")
+		}
+		return info.InternalBaseURL, nil
+	}, savePreferences: func(ctx context.Context, values map[string]any) error {
 		host := runtime.Host()
 		if host == nil {
 			return errors.New("Silo settings service unavailable")
 		}
 		return host.SetGlobalConfigEntry(ctx, "artwork_preferences", values)
+	}, saveSetPreferences: func(ctx context.Context, bindings map[string]string) error {
+		host := runtime.Host()
+		if host == nil {
+			return errors.New("Silo settings service unavailable")
+		}
+		values := map[string]any{}
+		for key, value := range bindings {
+			values[key] = value
+		}
+		return host.SetGlobalConfigEntry(ctx, "set_preferences", map[string]any{"bindings": values})
 	}}
 	runtime.Serve(runtime.ServeConfig{Servers: runtime.CapabilityServers{Runtime: s, MetadataProvider: s, ImageResolver: s, HttpRoutes: s}})
 }

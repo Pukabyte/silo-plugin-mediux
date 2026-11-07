@@ -69,6 +69,7 @@ func (s *server) settingsConfig() (map[string]any, error) {
 	public := publicPreferences(cfg)
 	public["csrf"] = csrf
 	public["token_configured"] = strings.TrimSpace(cfg.Token) != ""
+	public["collection_connection_configured"] = strings.TrimSpace(s.collectionKey) != ""
 	return public, nil
 }
 

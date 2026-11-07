@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en" data-theme="midnight-cinema">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Collection artwork · Mediux</title>
+  <link rel="stylesheet" href="ui.css">
+  <style>
+    :root { color-scheme:dark; --background:#141417; --foreground:#e8e8ec; --card:#1c1c20; --muted:#a3a3ad; --border:#303038; --accent:#a78bfa; --danger:#f87171; --success:#86efac; --radius:.75rem; font-family:var(--font-body,Outfit),system-ui,sans-serif; }
+    * { box-sizing:border-box; } body { margin:0; min-width:320px; background:var(--background); color:var(--foreground); font:400 .9375rem/1.5 var(--font-body,Outfit),system-ui,sans-serif; } main { max-width:1280px; margin:auto; padding:2rem 1.5rem 3rem; } header { display:flex; align-items:start; justify-content:space-between; gap:1rem; margin-bottom:1.25rem; } h1,h2,h3,p { margin:0; } h1 { font-size:1.8rem; line-height:1.2; letter-spacing:-.03em; } h2 { font-size:1.05rem; } h3 { font-size:.9rem; } .muted,.hint { color:var(--muted-foreground); } .hint { font-size:.84375rem; } .layout { display:grid; grid-template-columns:minmax(14rem, .8fr) minmax(0, 2fr); gap:1rem; } .panel { min-width:0; border:1px solid var(--border); border-radius:var(--radius); background:var(--card); padding:1rem; } .stack { display:grid; gap:1rem; } .field { display:block; min-width:0; font-weight:600; } .field > span { display:block; margin-bottom:.4rem; } input,select,button { font:inherit; } input,select { width:100%; min-height:2.5rem; color:var(--foreground); border:1px solid var(--border); border-radius:.5rem; background:#17171b; padding:.5rem .7rem; } button { min-height:2.5rem; border:1px solid var(--border); border-radius:.5rem; padding:.5rem .75rem; color:var(--foreground); background:transparent; cursor:pointer; font-weight:600; } button:hover:not(:disabled) { background:#292932; } button.primary { color:#17111f; border-color:transparent; background:var(--settings-accent); } button.primary:hover:not(:disabled) { background:color-mix(in srgb,var(--settings-accent) 88%,var(--foreground)); } button:disabled { opacity:.5; cursor:not-allowed; } input:focus-visible,select:focus-visible,button:focus-visible { outline:3px solid color-mix(in srgb,var(--settings-accent) 55%,transparent); outline-offset:2px; } .toolbar,.actions { display:flex; gap:.5rem; flex-wrap:wrap; align-items:end; } .toolbar .field { flex:1; } .collection-list { list-style:none; padding:0; margin:1rem 0 0; max-height:34rem; overflow:auto; border-top:1px solid var(--border); } .collection-list li { border-bottom:1px solid var(--border); } .collection-row { width:100%; min-height:3.25rem; display:block; text-align:left; border:0; border-radius:0; padding:.6rem 0; overflow-wrap:anywhere; } .collection-row[aria-current="true"] { color:#d8ccff; } .collection-count { display:block; color:var(--muted-foreground); font-size:.8rem; font-weight:400; } .covers { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.75rem; margin-top:.75rem; } .cover { min-width:0; border:1px solid var(--border); border-radius:.5rem; overflow:hidden; background:#17171b; } .cover img,.candidate img { display:block; width:100%; object-fit:cover; background:#27272f; } .cover img { aspect-ratio:16/9; } .cover.poster img { aspect-ratio:2/3; max-width:13rem; } .cover .caption { padding:.45rem .6rem; font-size:.8rem; color:var(--muted-foreground); } .search-row { display:flex; gap:.5rem; align-items:end; margin-top:.75rem; } .search-row .field { flex:1; } .candidate-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(9rem,1fr)); gap:.75rem; margin-top:.75rem; } .candidate { padding:0; overflow:hidden; text-align:left; background:#17171b; } .candidate[aria-pressed="true"] { outline:3px solid var(--settings-accent); outline-offset:1px; } .candidate img { aspect-ratio:2/3; } .candidate.backdrop img { aspect-ratio:16/9; } .candidate-label { display:block; padding:.45rem .55rem; overflow-wrap:anywhere; font-size:.78rem; font-weight:500; } .selected-art { display:grid; grid-template-columns:7rem minmax(0,1fr); gap:.75rem; align-items:start; margin-top:.75rem; } .selected-art img { display:block; width:100%; aspect-ratio:2/3; object-fit:cover; border-radius:.5rem; background:#27272f; } .empty { margin-top:.75rem; padding:.85rem; border:1px dashed var(--border); border-radius:.5rem; color:var(--muted-foreground); } .status { min-height:1.5rem; margin:1rem 0 0; font-weight:600; } .status.error { color:var(--danger); } .status.success { color:var(--success); } .hidden { display:none !important; } .back { white-space:nowrap; } @media (max-width:760px) { main { padding:1.25rem 1rem 2rem; } header,.layout { display:block; } header .back { margin-top:1rem; } .panel + .panel { margin-top:1rem; } .collection-list { max-height:15rem; } } @media (max-width:420px) { main { padding:.9rem .75rem 1.5rem; } h1 { font-size:1.5rem; } .search-row { align-items:stretch; flex-direction:column; } .search-row button { align-self:flex-start; } .candidate-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .selected-art { grid-template-columns:5.5rem minmax(0,1fr); } .covers { gap:.5rem; } }
+    /* Reset shared settings layout rules for this collection workflow. */
+    .layout > .panel,.stack > .panel { margin:0; }
+    .layout { align-items:start; }
+    .collection-row { white-space:normal; overflow-wrap:anywhere; }
+    .stack { align-content:start; }
+    .search-row { flex-direction:row; align-items:end; }
+    .candidate-grid:not(:empty) { max-height:36rem; overflow-y:auto; overscroll-behavior:contain; padding:.25rem; }
+    .set-results { display:grid; gap:1rem; margin-top:.75rem; }
+    .set-card { border:1px solid var(--border); border-radius:.65rem; padding:.75rem; background:#17171b; }
+    .set-heading { display:flex; gap:.75rem; justify-content:space-between; align-items:start; }
+    .set-heading h3 { overflow-wrap:anywhere; }
+    .set-meta { color:var(--muted-foreground); font-size:.8rem; }
+    .set-card .candidate-grid { margin-top:.65rem; }
+    button,input,select { min-height:44px; }
+    @media (max-width:760px) {
+      .layout > .stack { margin-top:1rem; }
+      .stack > .panel + .panel { margin-top:0; }
+      .search-row,.actions { flex-direction:column; align-items:stretch; }
+      .search-row .field,.search-row button,.actions button { width:100%; max-width:none !important; align-self:stretch; }
+      .search-row .field { flex:none; }
+      .actions button { white-space:normal; }
+      .candidate-grid:not(:empty) { max-height:28rem; }
+    }
+    .lookup-field{max-width:12rem}
+    .plugin-nav{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}.plugin-nav a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:.5rem .65rem;border:1px solid var(--border);border-radius:.5rem;color:var(--foreground);text-decoration:none}
+    @media(max-width:760px){.lookup-field{max-width:none}.plugin-nav{width:100%;margin-top:.75rem}.plugin-nav a{flex:1}.plugin-nav #back{width:100%;margin-top:0}}
+
+    .candidate{display:block;white-space:normal}.candidate-label{width:100%}
+    .art-item,.candidate-item{display:grid;gap:.45rem;min-width:0;align-content:start}.apply-image{display:block;width:100%;white-space:normal;min-height:44px}
+    .art-preview{width:min(1100px,calc(100% - 1.5rem));max-height:calc(100dvh - 1.5rem);padding:1rem;border:1px solid var(--border);border-radius:.75rem;background:var(--card);color:var(--foreground);overflow:auto}.art-preview::backdrop{background:rgba(0,0,0,.82)}.preview-toolbar{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:.75rem}.art-preview img{display:block;max-width:100%;width:auto;max-height:calc(100dvh - 10rem);height:auto;object-fit:contain;margin:auto}.preview-caption{margin-top:.75rem;overflow-wrap:anywhere;font-size:.875rem;color:var(--muted-foreground)}
+  </style>
+  <script>
+  (() => {
+    "use strict";
+    const root = document.documentElement;
+    const read = (key) => { try { return localStorage.getItem(key); } catch (_) { return null; } };
+    const owner = read("silo-ui-cache-owner") || "device";
+    const cached = (key) => read(key + ":" + owner);
+    const scale = cached("silo-ui-text-scale");
+    root.dataset.textScale = scale === "large" || scale === "x-large" ? scale : "default";
+    root.dataset.textWeight = cached("silo-ui-text-weight") === "strong" ? "strong" : "default";
+    root.dataset.highContrast = cached("silo-ui-high-contrast") === "true" ? "true" : "false";
+    const colors = new Set(["background","foreground","card","card-foreground","primary","primary-foreground","secondary","secondary-foreground","muted-foreground","muted-foreground-base","accent","accent-base","accent-foreground","destructive","success","border","border-base","input","input-base","ring","settings-accent","contrast-boost"]);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3000);
+    fetch("/api/v2/theme/admin-css", { credentials:"omit", headers:{"Accept":"application/json"}, signal:controller.signal })
+      .then((response) => response.ok ? response.json() : null)
+      .then((theme) => {
+        if (!theme) return;
+        let vars = theme.vars || {};
+        if (typeof vars === "string") { try { vars = JSON.parse(vars); } catch (_) { return; } }
+        if (!vars || typeof vars !== "object" || Array.isArray(vars)) return;
+        const declarations = [];
+        for (const [key,value] of Object.entries(vars)) {
+          if (typeof value !== "string" || value.length > 256 || /[;{}]|\/\*|<\/|url\s*\(/i.test(value)) continue;
+          const property = colors.has(key) ? "color" : key === "radius" ? "border-radius" : key === "font-body" ? "font-family" : "";
+          if (property && CSS.supports(property,value)) declarations.push("--" + key + ":" + value);
+        }
+        if (declarations.length) { const style = document.createElement("style"); style.id = "mediux-silo-theme"; style.textContent = ":root {" + declarations.join(";") + "}"; document.head.appendChild(style); }
+      })
+      .catch(() => { /* An unavailable theme leaves the bundled Silo defaults intact. */ })
+      .finally(() => clearTimeout(timeout));
+  })();
+  </script>
+</head>
+<body>
+  <main>
+    <header>
+      <div><h1>Collection artwork</h1><p class="muted">Browse Mediux set previews or use a remote image URL, then explicitly apply it to one collection.</p></div>
+      <div class="plugin-nav"><a href="sets" class="back">Mediux sets</a><a href="settings" class="back">Artwork settings</a><button type="button" class="back" id="back">Back to Silo</button></div>
+    </header>
+    <p id="connection-note" class="empty hidden" role="status"></p>
+    <div class="layout">
+      <section class="panel" aria-labelledby="collections-heading">
+        <h2 id="collections-heading">Collections</h2>
+        <label class="field" style="margin-top:.75rem"><span>Filter collections</span><input id="collection-filter" type="search" autocomplete="off" placeholder="Type a collection name"></label>
+        <p id="collection-count" class="hint" style="margin-top:.5rem"></p>
+        <ul id="collection-list" class="collection-list" aria-label="Collections"></ul>
+      </section>
+      <section class="stack" aria-live="polite">
+        <section class="panel" aria-labelledby="current-heading">
+          <h2 id="current-heading">Current artwork</h2>
+          <p id="selected-name" class="hint" style="margin-top:.25rem">Select a collection to begin.</p>
+          <div id="current-covers" class="covers" aria-live="polite"></div>
+        </section>
+        <section class="panel" aria-labelledby="browse-heading">
+          <h2 id="browse-heading">Browse Mediux</h2>
+          <p class="hint" style="margin-top:.25rem">Browse grouped Mediux sets. Search by franchise title, TMDB collection ID, or a numeric Mediux set ID / mediux.pro set URL. Genre packs are not exposed by this API.</p>
+          <div class="search-row">
+            <label class="field lookup-field"><span>Lookup</span><select id="lookup-mode"><option value="q">Title</option><option value="tmdb">TMDB collection ID</option><option value="set">Mediux set ID or URL</option></select></label>
+            <label class="field"><span id="query-label">Search term</span><input id="art-query" type="search" autocomplete="off" maxlength="100" placeholder="Select a collection first"></label>
+            <button type="button" id="search">Search Mediux</button>
+          </div>
+          <div class="actions" style="margin-top:.6rem"><button type="button" id="discover-related" disabled>Find related sets</button></div>
+          <p id="discover-note" class="hint" style="margin-top:.35rem">Uses collection TMDB identity when present, otherwise a bounded sample of member TMDB IDs. Member results are franchise matches, not genre packs.</p>
+          <div id="candidate-results" class="set-results" aria-label="Mediux artwork sets"></div>
+          <p id="candidate-empty" class="empty hidden"></p>
+          <div class="actions" style="margin-top:.75rem"><button type="button" id="save-set" disabled>Save preferred set</button><button type="button" id="open-preferred-set" disabled>Open saved set</button><button type="button" id="remove-set" disabled>Remove preferred set</button></div>
+          <p id="preferred-set-note" class="hint" style="margin-top:.45rem">Saved collection preferences keep a set easy to revisit. Artwork is never applied until you press Apply.</p>
+        </section>
+        <section class="panel" aria-labelledby="apply-heading">
+          <h2 id="apply-heading">Apply selected artwork</h2>
+          <div class="toolbar" style="margin-top:.75rem"><label class="field"><span>Cover type</span><select id="slot"><option value="poster">Poster</option><option value="backdrop">Backdrop</option></select></label></div>
+          <div id="selected-art" class="selected-art hidden"></div>
+          <label class="field" style="margin-top:1rem"><span>Or use a remote image URL</span><input id="external-url" type="url" inputmode="url" autocomplete="off" maxlength="2048" placeholder="https://example.com/collection-cover.jpg"></label>
+          <div class="actions" style="margin-top:.6rem"><button type="button" id="use-external">Use external URL</button><button type="button" class="primary" id="apply" disabled>Apply selected artwork</button></div>
+          <p class="hint" style="margin-top:.65rem">Only HTTP(S) image URLs are accepted. Applying changes only the selected collection.</p>
+        </section>
+      </section>
+    </div>
+    <p id="status" class="status" role="status" aria-live="polite"></p>
+    <dialog id="art-preview" class="art-preview" aria-labelledby="preview-title"><div class="preview-toolbar"><h2 id="preview-title">Artwork preview</h2><button id="close-preview" type="button" autofocus>Close preview</button></div><img id="preview-image" alt="" decoding="async"><p id="preview-caption" class="preview-caption"></p></dialog>
+  </main>
+  <script>
+  (() => {
+    "use strict";
+    const byId = (id) => document.getElementById(id);
+    const pagePath = location.pathname.replace(/\/+$/, "");
+    const basePath = pagePath.replace(/\/(?:sets|collections|artwork)$/, "");
+    const endpoint = (path) => basePath + path;
+    const list = byId("collection-list"), filter = byId("collection-filter"), count = byId("collection-count"), selectedName = byId("selected-name"), covers = byId("current-covers"), query = byId("art-query"), lookupMode = byId("lookup-mode"), queryLabel = byId("query-label"), search = byId("search"), discoverRelated = byId("discover-related"), discoverNote = byId("discover-note"), candidates = byId("candidate-results"), candidateEmpty = byId("candidate-empty"), slot = byId("slot"), externalURL = byId("external-url"), useExternal = byId("use-external"), selectedArt = byId("selected-art"), apply = byId("apply"), saveSet = byId("save-set"), removeSet = byId("remove-set"), preferredSetNote = byId("preferred-set-note"), status = byId("status"), connectionNote = byId("connection-note");
+    const MAX_RESULTS = 60, timeoutMs = 12000;
+    let csrf = "", catalog = [], selected = null, etag = "", chosen = null, itemController = null, searchController = null, selectionGeneration = 0, searchGeneration = 0, bindings = {}, bindingsGeneration = 0, preferencePending = false, artworkPending = false;
+    discoverRelated.addEventListener("click", () => findRelated());
+    const setStatus = (message, kind = "") => { status.textContent = message; status.className = "status " + kind; };
+    const setEmpty = (message) => { candidateEmpty.textContent = message; candidateEmpty.classList.toggle("hidden", !message); };
+    const validURL = (value) => { if (typeof value !== "string" || value.length > 4096 || /[\x00-\x1f\x7f]/.test(value)) return false; try { const url = new URL(value); return (url.protocol === "https:" || url.protocol === "http:") && !url.username && !url.password && !url.hash && Boolean(url.hostname); } catch (_) { return false; } };
+    const image = (url, alt) => { const node = document.createElement("img"); node.loading = "lazy"; node.alt = alt; node.src = url; return node; };
+    const request = async (url, options = {}, controller) => {
+      const signalController = controller || new AbortController();
+      let expired = false;
+      const timer = setTimeout(() => { expired = true; signalController.abort(); }, timeoutMs);
+      try { return await fetch(url, { ...options, credentials:"same-origin", headers:{ Accept:"application/json", ...(options.headers || {}) }, signal:signalController.signal }); }
+      catch (error) { if (expired) { const timeout = new Error("Request timed out"); timeout.name = "TimeoutError"; throw timeout; } throw error; }
+      finally { clearTimeout(timer); }
+    };
+    async function messageFor(response, fallback) { if (response.status === 401 || response.status === 403) return "Your Silo sign-in may have expired; return to Silo and open this page again."; try { const body = await response.json(); if (body && typeof body.error === "string" && body.error.trim()) return body.error.trim(); } catch (_) {} return fallback; }
+
+ let previewReturnKey="";
+ function previewDescriptor(art){return art.kind+(Number.isInteger(art.season)?" season "+art.season:"")+(Number.isInteger(art.episode)?" episode "+art.episode:"")+(art.language?" "+art.language:"")}
+ function openArtworkPreview(art,opener){const modal=byId("art-preview");previewReturnKey=opener.dataset.previewKey||"";byId("preview-image").src=art.url;byId("preview-image").alt=(art.title||art.set_title||"Artwork")+" "+art.kind;byId("preview-caption").textContent=[art.title||art.set_title,art.creator,previewDescriptor(art)].filter(Boolean).join(" · ");if(!modal.open)modal.showModal()}
+ byId("close-preview").addEventListener("click",()=>byId("art-preview").close());
+ byId("art-preview").addEventListener("click",event=>{const modal=byId("art-preview"),rect=modal.getBoundingClientRect();if(event.target===modal&&(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom))modal.close()});
+ byId("art-preview").addEventListener("close",()=>{const root=document.getElementById("collections-view")||document;const opener=[...root.querySelectorAll("[data-preview-key]")].find(node=>node.dataset.previewKey===previewReturnKey);if(opener)opener.focus()});
+
+    function renderCatalog() {
+      const needle = filter.value.trim().toLocaleLowerCase(); const shown = catalog.filter((collection) => !needle || collection.title.toLocaleLowerCase().includes(needle));
+      list.replaceChildren(); count.textContent = `${shown.length} of ${catalog.length} collections`;
+      shown.slice(0, 100).forEach((collection) => { const item = document.createElement("li"), button = document.createElement("button"), secondary = document.createElement("span"); button.type = "button"; button.className = "collection-row"; button.setAttribute("aria-current", String(Boolean(selected && selected.id === collection.id))); button.textContent = collection.title; secondary.className = "collection-count"; secondary.textContent = `${Number(collection.item_count) || 0} items · ${Array.isArray(collection.library_names) && collection.library_names.length ? collection.library_names.join(", ") : (collection.library_ids || []).map(id => "Library " + id).join(", ")}`; button.appendChild(secondary); button.addEventListener("click", () => selectCollection(collection)); item.appendChild(button); list.appendChild(item); });
+      if (!shown.length) { const item = document.createElement("li"); item.className = "empty"; item.textContent = "No collections match that filter."; list.appendChild(item); }
+    }
+    function renderCovers(collection) { covers.replaceChildren(); ["poster", "backdrop"].forEach((kind) => { const url = collection && collection[kind + "_url"], card = document.createElement("div"), caption = document.createElement("div"); card.className = "cover " + kind; if (validURL(url)) card.appendChild(image(url, collection.title + " current " + kind)); else { const placeholder = document.createElement("div"); placeholder.className = "empty"; placeholder.textContent = "No " + kind + " set"; card.appendChild(placeholder); } caption.className = "caption"; caption.textContent = kind === "poster" ? "Poster" : "Backdrop"; card.appendChild(caption); covers.appendChild(card); }); }
+    function renderChosen() { candidates.querySelectorAll(".apply-image").forEach(button=>button.disabled=!selected||!etag||!csrf||artworkPending); byId("open-preferred-set").disabled=!selected||!bindings["collection:"+selected.id]; selectedArt.replaceChildren(); const setID = chosen && typeof chosen.set_id === "string" ? chosen.set_id : ""; saveSet.disabled = !selected || !setID; removeSet.disabled = !selected || !bindings["collection:" + selected.id]; preferredSetNote.textContent = selected && bindings["collection:" + selected.id] ? "Preferred Mediux set " + bindings["collection:" + selected.id] + " is saved. Apply remains a separate action." : "Saved collection preferences keep a set easy to revisit. Artwork is never applied until you press Apply."; if (!chosen) { selectedArt.classList.add("hidden"); apply.disabled = true; return; } selectedArt.classList.remove("hidden"); selectedArt.appendChild(image(chosen.url, "Selected " + chosen.kind + " artwork")); const copy = document.createElement("div"), heading = document.createElement("h3"), detail = document.createElement("p"); heading.textContent = chosen.title || chosen.set_title || "External image"; detail.className = "hint"; detail.textContent = `${chosen.kind === "backdrop" ? "Backdrop" : "Poster"} selected from set ${setID || "external URL"}. Apply it only when ready.`; copy.append(heading, detail); selectedArt.appendChild(copy); apply.disabled = artworkPending || !selected || !etag || !validURL(chosen.url); }
+    function choose(candidate) { chosen = candidate; slot.value = candidate.kind === "backdrop" ? "backdrop" : "poster"; candidates.querySelectorAll("button[data-url]").forEach(button => button.setAttribute("aria-pressed",String(button.dataset.url === candidate.url))); externalURL.value = candidate.external ? candidate.url : ""; renderChosen(); setStatus("Artwork selected. Apply it when ready."); }
+    function candidateButton(candidate) {
+      const item=document.createElement("div"),button=document.createElement("button"),label=document.createElement("span"),use=document.createElement("button");
+      item.className="candidate-item";button.type=use.type="button";button.dataset.url=candidate.url;button.dataset.previewKey=candidate.set_id+":"+candidate.id+":"+candidate.kind;button.className="candidate "+(candidate.kind==="backdrop"?"backdrop":"");button.setAttribute("aria-pressed",String(Boolean(chosen&&chosen.url===candidate.url)));button.setAttribute("aria-haspopup","dialog");button.appendChild(image(candidate.url,candidate.title||"Mediux artwork"));label.className="candidate-label";label.textContent=(candidate.kind==="backdrop"?"Backdrop":"Poster")+(candidate.creator?" · "+candidate.creator:"");button.append(label);
+      button.addEventListener("click",()=>{choose(candidate);openArtworkPreview(candidate,button)});use.className="apply-image";use.textContent="Apply image";use.setAttribute("aria-label","Apply "+candidate.kind+" image");use.disabled=!selected||!etag||!csrf||artworkPending;use.addEventListener("click",()=>{choose(candidate);save()});item.append(button,use);return item;
+    }
+    function renderCandidates(items) { candidates.replaceChildren(); const groups = new Map(); items.slice(0, MAX_RESULTS).forEach((candidate) => { if (!candidate || !validURL(candidate.url)) return; const id = typeof candidate.set_id === "string" && candidate.set_id ? candidate.set_id : "unknown"; if (!groups.has(id)) groups.set(id, []); groups.get(id).push(candidate); }); for (const [setID, art] of groups) { const card = document.createElement("section"), heading = document.createElement("div"), name = document.createElement("h3"), meta = document.createElement("p"), grid = document.createElement("div"), first = art[0]; card.className = "set-card"; heading.className = "set-heading"; name.textContent = first.set_title || first.title || "Mediux set " + setID; meta.className = "set-meta"; meta.textContent = `${first.creator || "Unknown creator"} · ${art.length} artwork · Set ${setID}`; heading.append(name, meta); grid.className = "candidate-grid"; art.forEach(candidate => grid.appendChild(candidateButton(candidate))); card.append(heading, grid); candidates.appendChild(card); } }
+    async function loadCollection(preserveStatus = false) {
+      const generation = ++selectionGeneration;
+      if (itemController) itemController.abort();
+      itemController = new AbortController();
+      const id = selected.id;
+      selectedName.textContent = "Loading current artwork…";
+      renderCovers(null);
+      if (!preserveStatus) setStatus("");
+      const active = () => generation === selectionGeneration && selected && selected.id === id;
+      try {
+        const response = await request(endpoint("/collections/item?id=" + encodeURIComponent(id)), {}, itemController);
+        if (!active()) return;
+        if (!response.ok) { const message = await messageFor(response, "Could not load this collection. Try again."); if (active()) setStatus(message, "error"); return; }
+        const payload = await response.json();
+        if (!active() || !payload || !payload.collection || payload.collection.id !== id) return;
+        selected = payload.collection;
+        etag = typeof payload.etag === "string" ? payload.etag : "";
+        selectedName.textContent = selected.title;
+        renderCatalog(); renderCovers(selected); renderChosen();
+      } catch (error) { if (error.name !== "AbortError" && active()) setStatus(error.name === "TimeoutError" ? "Collection load timed out. Select it again to retry." : "Could not load this collection. Try again.", "error"); }
+    }
+    function selectCollection(collection) {
+      if (searchController) searchController.abort();
+      ++searchGeneration;
+      search.disabled = false;
+      selected = collection; etag = ""; chosen = null;
+      discoverRelated.disabled = false;
+      if (collection.tmdb_collection_id) { lookupMode.value = "tmdb"; query.value = collection.tmdb_collection_id; } else { lookupMode.value = "q"; query.value = collection.title; }
+      lookupMode.dispatchEvent(new Event("change")); candidates.replaceChildren(); setEmpty(""); renderCatalog(); renderChosen(); loadCollection();
+    }
+    async function findArtwork() {
+      if (!selected) { setStatus("Select a collection before searching Mediux.", "error"); return; }
+      const term = query.value.trim(), mode = lookupMode.value;
+      if ((mode === "q" && term.length < 2) || (mode !== "q" && term.length < 1) || term.length > 100) { setStatus(mode === "q" ? "Enter 2 to 100 characters to search." : "Enter a TMDB ID or Mediux set ID / URL.", "error"); return; }
+      const generation = selectionGeneration, searchID = ++searchGeneration;
+      if (searchController) searchController.abort();
+      searchController = new AbortController();
+      const active = () => generation === selectionGeneration && searchID === searchGeneration;
+      search.disabled = true; candidates.replaceChildren(); setEmpty(""); setStatus("Searching Mediux…");
+      try {
+        const response = await request(endpoint("/collection-artwork?" + encodeURIComponent(mode) + "=" + encodeURIComponent(term)), {}, searchController);
+        if (!active()) return;
+        if (!response.ok) { const message = await messageFor(response, "Could not search Mediux artwork. Try again."); if (active()) setStatus(message,"error"); return; }
+        const payload = await response.json();
+        if (!active()) return;
+        const items = Array.isArray(payload && payload.items) ? payload.items.filter(item => item && (item.kind === "poster" || item.kind === "backdrop") && validURL(item.url)) : [];
+        renderCandidates(items);
+        setEmpty(items.length ? "" : "No collection set matched this lookup. Genre and streaming-service packs are not available through the connected API. Use a direct image URL from Mediux or ThePosterDB below.");
+        setStatus(items.length ? `Showing ${Math.min(items.length, MAX_RESULTS)} Mediux choices.${payload.has_more ? " Refine the search for more matches." : ""}` : "");
+      } catch (error) { if (error.name !== "AbortError" && active()) setStatus(error.name === "TimeoutError" ? "Mediux search timed out. Try again." : "Could not search Mediux artwork. Try again.", "error"); }
+      finally { if (active()) search.disabled = false; }
+    }
+    async function findRelated() { if (!selected) return; const id=selected.id,generation=selectionGeneration,searchID=++searchGeneration; if(searchController)searchController.abort();searchController=new AbortController();discoverRelated.disabled=true;candidates.replaceChildren();setEmpty("");setStatus("Finding related Mediux sets…");try{const response=await request(endpoint("/collections/discover?id="+encodeURIComponent(id)),{},searchController);const active=()=>generation===selectionGeneration&&searchID===searchGeneration&&selected&&selected.id===id;if(!active())return;if(!response.ok){setStatus(await messageFor(response,"Could not find related Mediux sets."),"error");return}const payload=await response.json();if(!active())return;const items=Array.isArray(payload&&payload.items)?payload.items.filter(item=>item&&(item.kind==="poster"||item.kind==="backdrop")&&validURL(item.url)):[];renderCandidates(items);discoverNote.textContent=payload&&payload.basis==="member_tmdb"?"Related sets came from a bounded sample of collection member TMDB IDs. They are franchise matches, not genre packs.":"Related sets came from this collection’s TMDB identity.";setEmpty(items.length?"":"No related Mediux collection sets found.");setStatus(items.length?"Showing related Mediux sets.":"")}catch(error){if(error.name!=="AbortError"&&generation===selectionGeneration)setStatus(error.name==="TimeoutError"?"Related-set lookup timed out. Try again.":"Could not find related Mediux sets.","error")}finally{if(generation===selectionGeneration)discoverRelated.disabled=false}}
+    async function save() {
+      if(artworkPending)return;
+      if (!selected || !chosen || !etag || !csrf) { setStatus("Select a collection and artwork before applying.", "error"); return; }
+      const currentID = selected.id, currentGeneration = selectionGeneration;
+      const active = () => currentGeneration === selectionGeneration && selected && selected.id === currentID;
+      artworkPending=true; renderChosen(); apply.disabled = true; setStatus("Applying artwork…");
+      try {
+        const response = await request(endpoint("/collections/cover"), { method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ csrf:csrf, id:currentID, slot:slot.value, url:chosen.url, etag:etag }) });
+        if (!active()) return;
+        if (response.status === 412) { etag = ""; renderChosen(); setStatus("This collection changed elsewhere. Current artwork was refreshed; review it and apply again if wanted.","error"); loadCollection(true); return; }
+        if (response.status === 503) { connectionNote.textContent = "Collection artwork needs the Mediux plugin connection configured by an administrator. Configure the plugin in Silo, then return here. No API key is entered or stored in this page."; connectionNote.classList.remove("hidden"); setStatus("Collection artwork connection is not configured.","error"); return; }
+        if (!response.ok) { const message = await messageFor(response,"Could not confirm the artwork save. Review current artwork before retrying."); if (active()) { etag=""; renderChosen(); setStatus(message,"error"); loadCollection(true); } return; }
+        const payload = await response.json();
+        if (!active()) return;
+        if (!payload || !payload.collection || payload.collection.id !== currentID) throw new Error("Invalid save response");
+        selected = payload.collection; etag = typeof payload.etag === "string" ? payload.etag : "";
+        selectedName.textContent = selected.title; renderCatalog(); renderCovers(selected);
+        setStatus("Artwork applied to " + selected.title + ".","success");
+      } catch (error) {
+        if (active()) { etag=""; renderChosen(); setStatus(error.name === "TimeoutError" ? "Artwork save timed out. Current artwork is being refreshed; review it before retrying." : "Could not confirm the artwork save. Review current artwork before retrying.","error"); loadCollection(true); }
+      } finally { artworkPending=false; renderChosen(); }
+    }
+
+    async function loadBindings() { const generation=++bindingsGeneration; try { const response = await request(endpoint("/sets/preferences")); if (!response.ok || generation!==bindingsGeneration || preferencePending) return; const payload = await response.json(); if (generation!==bindingsGeneration || preferencePending) return; if (payload && payload.bindings && typeof payload.bindings === "object" && !Array.isArray(payload.bindings)) bindings = payload.bindings; if (payload && typeof payload.csrf === "string") csrf = payload.csrf; renderChosen(); } catch (_) {} }
+    async function saveBinding(setID) { if (!selected || !csrf || preferencePending) return; const id=selected.id,generation=selectionGeneration; preferencePending=true; ++bindingsGeneration; saveSet.disabled=true; removeSet.disabled=true; try { const response = await request(endpoint("/sets/preferences"), {method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({csrf:csrf,type:"collection",id:id,set_id:setID})}); if (!response.ok) { if(generation===selectionGeneration&&selected&&selected.id===id)setStatus(await messageFor(response,"Could not save preferred set."),"error"); return; } const payload = await response.json(); if (payload && payload.bindings && typeof payload.bindings === "object") bindings = payload.bindings; if (payload && typeof payload.csrf === "string") csrf = payload.csrf; if(generation===selectionGeneration&&selected&&selected.id===id){renderChosen();setStatus(setID ? "Preferred set saved. Apply artwork separately when ready." : "Preferred set removed.","success");} } catch (_) { if(generation===selectionGeneration&&selected&&selected.id===id)setStatus("Could not save preferred set. Try again.","error"); } finally { preferencePending=false; if(generation===selectionGeneration&&selected&&selected.id===id)renderChosen(); } }
+    async function initialize() { setStatus("Loading collections…"); try { const [configResponse, catalogResponse] = await Promise.all([request(endpoint("/settings/config")), request(endpoint("/collections/catalog"))]); if (!configResponse.ok) { setStatus(await messageFor(configResponse, "Could not load plugin configuration. Try again."), "error"); return; } const config = await configResponse.json(); csrf = typeof config.csrf === "string" ? config.csrf : ""; if (config.collection_connection_configured !== true) { connectionNote.textContent = "Collection artwork needs the Mediux plugin connection configured by an administrator. Configure the plugin in Silo, then return here. No API key is entered or stored in this page."; connectionNote.classList.remove("hidden"); } if (!catalogResponse.ok) { setStatus(await messageFor(catalogResponse, "Could not load collections. Try again."), "error"); return; } const payload = await catalogResponse.json(); catalog = Array.isArray(payload && payload.items) ? payload.items.filter((item) => item && typeof item.id === "string" && typeof item.title === "string") : []; renderCatalog(); await loadBindings(); setStatus(catalog.length ? "" : "No collections are available to edit."); const requested=new URL(location.href).searchParams.get("collection"); const match=catalog.find(item=>item.id===requested);if(match)selectCollection(match); }
+      catch (_) { setStatus("Could not load collections. Try again.", "error"); } }
+    byId("open-preferred-set").addEventListener("click",()=>{const id=selected&&bindings["collection:"+selected.id];if(id){lookupMode.value="set";lookupMode.dispatchEvent(new Event("change"));query.value=id;findArtwork();}}); filter.addEventListener("input", renderCatalog); search.addEventListener("click", findArtwork); query.addEventListener("keydown", (event) => { if (event.key === "Enter") { event.preventDefault(); findArtwork(); } }); lookupMode.addEventListener("change", () => { const labels = {q:"Search term",tmdb:"TMDB collection ID",set:"Mediux set ID or URL"}; queryLabel.textContent = labels[lookupMode.value] || "Search term"; query.placeholder = lookupMode.value === "q" ? "Select a collection first" : "Paste an ID or Mediux set URL"; }); slot.addEventListener("change", () => { if (chosen) { chosen = { ...chosen, kind:slot.value }; renderChosen(); } }); useExternal.addEventListener("click", () => { const url = externalURL.value.trim(); if (!validURL(url)) { setStatus("Enter a HTTP(S) image URL without credentials.", "error"); return; } choose({ url:url, kind:slot.value, title:"External image", external:true }); }); saveSet.addEventListener("click", () => { if (chosen && chosen.set_id) saveBinding(chosen.set_id); }); removeSet.addEventListener("click", () => saveBinding("")); apply.addEventListener("click", save); byId("back")?.addEventListener("click", () => { location.href = "/admin/plugins"; }); window.addEventListener("pagehide", () => { if (itemController) itemController.abort(); if (searchController) searchController.abort(); }); window.addEventListener("artwork:view",event=>{if(event.detail==="collections")loadBindings()}); initialize();
+  })();
+  </script>
+</body>
+</html>

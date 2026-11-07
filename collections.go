@@ -26,6 +26,7 @@ func movieCollectionSets(item map[string]json.RawMessage, movieID string) ([]set
 			} `json:"movie"`
 			Set *struct {
 				ID         string  `json:"id"`
+				Title      string  `json:"set_title"`
 				Popularity float64 `json:"popularity"`
 				User       struct {
 					Username string `json:"username"`
@@ -43,7 +44,7 @@ func movieCollectionSets(item map[string]json.RawMessage, movieID string) ([]set
 			if !found {
 				index = len(sets)
 				indices[asset.Set.ID] = index
-				sets = append(sets, set{ID: asset.Set.ID, Creator: asset.Set.User.Username, Popularity: asset.Set.Popularity})
+				sets = append(sets, set{ID: asset.Set.ID, Title: asset.Set.Title, Creator: asset.Set.User.Username, Popularity: asset.Set.Popularity})
 			}
 			modified, _ := time.Parse(time.RFC3339Nano, asset.Modified)
 			sets[index].Art = append(sets[index].Art, artwork{
