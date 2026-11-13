@@ -21,19 +21,19 @@ const collectionMovieResponse = `{
     "movies_by_id": {
       "id": "429617",
       "movie_sets": [{
-        "id": "23725", "popularity": 100, "user_created": {"username": "CmdrRiker"},
+        "id": "23725", "popularity_global": 1, "user_created": {"username": "CmdrRiker"},
         "movie_poster": [{"id": "standalone-poster", "modified_on": "2026-10-11T01:02:03Z", "language": {"display_name": "English"}}],
         "movie_backdrop": [], "files": []
       }],
       "posters": [
-        {"id": "collection-poster", "modified_on": "2026-10-10T01:02:03Z", "language": {"display_name": "English"}, "movie": {"id": "429617"}, "collection_set": {"id": "24304", "popularity": 1, "user_created": {"username": "willtong93"}}},
+        {"id": "collection-poster", "modified_on": "2026-10-10T01:02:03Z", "language": {"display_name": "English"}, "movie": {"id": "429617"}, "collection_set": {"id": "24304", "popularity_global": 100, "user_created": {"username": "willtong93"}}},
         {"id": "no-collection", "modified_on": "2026-10-10T01:02:03Z", "language": {"display_name": "English"}, "movie": {"id": "429617"}, "collection_set": null},
         {"id": "empty-collection", "modified_on": "2026-10-10T01:02:03Z", "language": {"display_name": "English"}, "movie": {"id": "429617"}, "collection_set": {"id": "", "user_created": {"username": "ignored"}}},
         {"id": "wrong-movie", "modified_on": "2026-10-10T01:02:03Z", "language": {"display_name": "English"}, "movie": {"id": "other"}, "collection_set": {"id": "wrong", "user_created": {"username": "ignored"}}},
         {"id": "null-movie", "modified_on": "2026-10-10T01:02:03Z", "language": {"display_name": "English"}, "movie": null, "collection_set": {"id": "null", "user_created": {"username": "ignored"}}}
       ],
       "backdrops": [
-        {"id": "collection-backdrop", "modified_on": "2026-10-10T01:02:03Z", "language": {"display_name": ""}, "movie": {"id": "429617"}, "collection_set": {"id": "24304", "popularity": 1, "user_created": {"username": "willtong93"}}},
+        {"id": "collection-backdrop", "modified_on": "2026-10-10T01:02:03Z", "language": {"display_name": ""}, "movie": {"id": "429617"}, "collection_set": {"id": "24304", "popularity_global": 100, "user_created": {"username": "willtong93"}}},
         {"id": "no-collection-backdrop", "modified_on": "2026-10-10T01:02:03Z", "language": {"display_name": "English"}, "movie": {"id": "429617"}, "collection_set": null}
       ]
     }
@@ -148,7 +148,7 @@ func TestParseMovieCollectionArtworkGroupsOnlyValidCollectionSets(t *testing.T) 
 		t.Fatalf("standalone movie artwork changed: %#v", standalone)
 	}
 	collection, ok := byID["24304"]
-	if !ok || collection.Creator != "willtong93" || collection.Popularity != 1 || len(collection.Art) != 2 {
+	if !ok || collection.Creator != "willtong93" || collection.GlobalRank != 100 || len(collection.Art) != 2 {
 		t.Fatalf("collection set = %#v", collection)
 	}
 	if collection.Art[0].SetID != "24304" || collection.Art[0].Language != "en" || collection.Art[0].Modified.IsZero() {

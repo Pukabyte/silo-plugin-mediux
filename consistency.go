@@ -17,7 +17,7 @@ func (p *provider) consistentSet(b bundle, cfg settings, kind, language string) 
 	type score struct {
 		id                       string
 		rank, coverage, language int
-		popularity               float64
+		globalRank               mediuxRank
 		complete                 bool
 	}
 	creatorFirst := kind == "season" && cfg.SeasonConsistency == "CreatorPriority" ||
@@ -45,12 +45,12 @@ func (p *provider) consistentSet(b bundle, cfg settings, kind, language string) 
 		if len(scopes) == 0 || s.ID == "" {
 			continue
 		}
-		candidate := score{s.ID, rank, len(scopes), tier, s.Popularity, len(scopes) == len(expected)}
+		candidate := score{s.ID, rank, len(scopes), tier, s.GlobalRank, len(scopes) == len(expected)}
 		if best == nil || !creatorFirst && candidate.complete && !best.complete || (creatorFirst || candidate.complete == best.complete) && (candidate.rank < best.rank ||
 			candidate.rank == best.rank && (candidate.coverage > best.coverage ||
 				candidate.coverage == best.coverage && (candidate.language < best.language ||
-					candidate.language == best.language && (candidate.popularity > best.popularity ||
-						candidate.popularity == best.popularity && candidate.id < best.id)))) {
+					candidate.language == best.language && (candidate.globalRank.before(best.globalRank) ||
+						!best.globalRank.before(candidate.globalRank) && candidate.id < best.id)))) {
 			best = &candidate
 		}
 	}
