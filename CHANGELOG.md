@@ -1,5 +1,43 @@
 # Changelog
 
+## 0.1.17
+
+- Show all returned set images through paged catalog requests instead of eight per type.
+- Separate posters, backdrops, logos, season posters and title cards into horizontal scroll rows.
+- Group season artwork by season and sort title cards by episode; add accessible scroll controls.
+
+## 0.1.16
+
+- Combine movie/show sets and collection covers in one Artwork Manager window with state-preserving tabs. Keep previous plugin URLs working.
+- Clicking artwork opens an enlarged preview; explicit Apply image controls sit beneath individual thumbnails. Apply set applies the complete matching set.
+- Preserve existing native caching/publication and remote-source URL retention.
+
+## 0.1.15
+
+- Apply a chosen movie/show image immediately through Silo native image publication, using the remote Mediux HTTPS URL as the retained source.
+- Apply and remember a whole set across matching local title, season and episode artwork, with sequential progress, stop control and no automatic retries after failures.
+- Validate read-only plans, target identity, creator eligibility and signed short-lived operations inside the plugin.
+
+## 0.1.14
+
+- Add AURA-style collection set groups, direct set URL lookup and exact/member TMDB franchise discovery.
+- Add a plugin-owned movie/show set manager with native title search, previews and persistent preferred sets for later automatic artwork refreshes.
+- Save collection browsing preferences separately from explicit ETag-safe remote cover assignment. Keep image galleries complete and leave missing selected-set artwork unchanged.
+
+## 0.1.13
+
+- Fix mobile search alignment, stacked action buttons and doubled card spacing, including larger text settings.
+- Bound artwork gallery scrolling and explain the connected API franchise-only search coverage before searching.
+
+## 0.1.12
+
+- Add a plugin-owned collection cover manager with browsing, previews and explicit remote URL assignment through existing Silo APIs. No Silo source changes or server restart are required.
+- Keep the dedicated Silo connection key in encrypted plugin configuration; administrator access, CSRF and native ETags protect assignments.
+
+## 0.1.11
+
+- Add administrator-only discovery of movie collection cover posters and backdrops. Results include stable remote HTTPS URLs, respect creator preferences, and exclude member-movie artwork. Silo owns selection and assignment.
+- Genre/category packs on the Mediux website are not exposed by the verified authenticated API schema; this release does not scrape them or substitute movie artwork.
 ## Unreleased
 
 - Rank sets by Mediux `popularity_global`, where 1 is best. Automatic selection and season and title-card consistency previously treated the rank as a score and preferred the lowest-ranked set from the same creator, and manual galleries listed it first. The global rank also lets movie and collection sets compare on one scale. Unranked sets still sort last.

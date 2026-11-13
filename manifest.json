@@ -1,6 +1,6 @@
 {
   "plugin_id": "community.mediux",
-  "version": "0.1.10",
+  "version": "0.1.17",
   "checksum": "__CHECKSUM__",
   "silo_api_version": "v1",
   "presentation": {
@@ -90,6 +90,24 @@
         ]
       },
       "description": "Configure your API token here. Use Mediux artwork settings in the plugin menu or admin sidebar for creator priorities and artwork preferences."
+    },
+    {
+      "key": "collection_connection",
+      "title": "Collection connection",
+      "required": false,
+      "description": "Optional connection for plugin-owned collection artwork management. Use a dedicated administrator API key for this Silo instance; the host stores it encrypted. The plugin obtains this host's internal API URL through the SDK.",
+      "json_schema": "{\"type\":\"object\",\"properties\":{\"api_key\":{\"type\":\"string\",\"minLength\":1}},\"additionalProperties\":false}",
+      "admin_form": {
+        "fields": [
+          {
+            "key": "api_key",
+            "label": "Silo API key",
+            "control": 3,
+            "secret": true,
+            "required": false
+          }
+        ]
+      }
     }
   ],
   "http_routes": [
@@ -119,6 +137,107 @@
       "method": "PUT",
       "path": "/settings/config",
       "access": "admin"
+    },
+    {
+      "id": "collection-artwork",
+      "method": "GET",
+      "path": "/collection-artwork",
+      "access": "admin"
+    },
+    {
+      "id": "collection-manager",
+      "method": "GET",
+      "path": "/collections",
+      "access": "admin",
+      "navigable": false
+    },
+    {
+      "id": "collection-manager-style",
+      "method": "GET",
+      "path": "/ui.css",
+      "access": "admin"
+    },
+    {
+      "id": "collection-catalog",
+      "method": "GET",
+      "path": "/collections/catalog",
+      "access": "admin"
+    },
+    {
+      "id": "collection-item",
+      "method": "GET",
+      "path": "/collections/item",
+      "access": "admin"
+    },
+    {
+      "id": "collection-apply-cover",
+      "method": "POST",
+      "path": "/collections/cover",
+      "access": "admin"
+    },
+    {
+      "id": "mediux-set-manager",
+      "method": "GET",
+      "path": "/sets",
+      "access": "admin",
+      "navigable": false
+    },
+    {
+      "id": "mediux-set-catalog",
+      "method": "GET",
+      "path": "/sets/catalog",
+      "access": "admin"
+    },
+    {
+      "id": "mediux-set-preferences-read",
+      "method": "GET",
+      "path": "/sets/preferences",
+      "access": "admin"
+    },
+    {
+      "id": "mediux-set-preferences-save",
+      "method": "PUT",
+      "path": "/sets/preferences",
+      "access": "admin"
+    },
+    {
+      "id": "mediux-set-library-search",
+      "method": "GET",
+      "path": "/sets/items",
+      "access": "admin"
+    },
+    {
+      "id": "mediux-set-library-item",
+      "method": "GET",
+      "path": "/sets/item",
+      "access": "admin"
+    },
+    {
+      "id": "mediux-collection-discovery",
+      "method": "GET",
+      "path": "/collections/discover",
+      "access": "admin"
+    },
+    {
+      "id": "mediux-set-plan",
+      "method": "POST",
+      "path": "/sets/plan",
+      "access": "admin"
+    },
+    {
+      "id": "mediux-set-apply",
+      "method": "POST",
+      "path": "/sets/apply",
+      "access": "admin"
+    },
+    {
+      "id": "artwork-manager",
+      "method": "GET",
+      "path": "/artwork",
+      "access": "admin",
+      "navigable": true,
+      "navigation_label": "Artwork Manager",
+      "navigation_kind": "admin"
     }
   ]
 }

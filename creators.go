@@ -93,6 +93,27 @@ func (s *server) Handle(ctx context.Context, r *pluginv1.HandleHTTPRequest) (*pl
 	if r.GetHeaders()["X-Silo-User-Role"] != "admin" {
 		return respond(403, map[string]string{"error": "Administrator access required"})
 	}
+	if r.GetPath() == "/artwork" {
+		return s.handleArtworkManager(ctx, r)
+	}
+	if r.GetPath() == "/sets/plan" || r.GetPath() == "/sets/apply" {
+		return s.handleSetApply(ctx, r)
+	}
+	if r.GetPath() == "/sets/items" || r.GetPath() == "/sets/item" {
+		return s.handleSetLibrary(ctx, r)
+	}
+	if r.GetPath() == "/sets" || r.GetPath() == "/sets/catalog" || r.GetPath() == "/sets/preferences" {
+		return s.handleSets(ctx, r)
+	}
+	if r.GetPath() == "/collections/discover" {
+		return s.handleCollectionDiscovery(ctx, r)
+	}
+	if r.GetPath() == "/collection-artwork" {
+		return s.handleCollectionCovers(ctx, r)
+	}
+	if r.GetPath() == "/collections" || r.GetPath() == "/collections/catalog" || r.GetPath() == "/collections/item" || r.GetPath() == "/collections/cover" || r.GetPath() == "/ui.css" {
+		return s.handleCollections(ctx, r)
+	}
 	if r.GetPath() == "/settings" || r.GetPath() == "/settings/config" {
 		return s.handleSettings(ctx, r)
 	}
