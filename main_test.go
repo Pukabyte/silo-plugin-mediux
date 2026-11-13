@@ -45,9 +45,9 @@ func TestRankingExclusionAndGapFill(t *testing.T) {
 	p := newProvider()
 	p.configure(map[string]any{"priority_creators": "fav", "excluded_creators": "bad", "image_selection": "BestOnly"})
 	b := bundle{Sets: []set{
-		{Creator: "bad", Popularity: 99, Art: []artwork{{ID: "bad", Kind: "poster"}}},
-		{Creator: "other", Popularity: 50, Art: []artwork{{ID: "other", Kind: "poster"}}},
-		{Creator: "fav", Popularity: 1, Art: []artwork{{ID: "fav", Kind: "poster"}}},
+		{Creator: "bad", GlobalRank: 1, Art: []artwork{{ID: "bad", Kind: "poster"}}},
+		{Creator: "other", GlobalRank: 2, Art: []artwork{{ID: "other", Kind: "poster"}}},
+		{Creator: "fav", GlobalRank: 50, Art: []artwork{{ID: "fav", Kind: "poster"}}},
 	}}
 	got := p.selectArt(b, p.snapshot(), "poster", 0, 0, false)
 	if len(got) != 1 || got[0].ID != "fav" {
@@ -58,7 +58,7 @@ func TestRankingExclusionAndGapFill(t *testing.T) {
 	if len(got) != 1 || got[0].ID != "other" {
 		t.Fatalf("gap-fill = %#v", got)
 	}
-	b = bundle{Sets: []set{{Creator: "z", Popularity: 100, Art: []artwork{{ID: "high", Creator: "z", Kind: "poster"}}}, {Creator: "a", Popularity: 1, Art: []artwork{{ID: "low", Creator: "a", Kind: "poster"}}}}}
+	b = bundle{Sets: []set{{Creator: "z", GlobalRank: 1, Art: []artwork{{ID: "high", Creator: "z", Kind: "poster"}}}, {Creator: "a", GlobalRank: 100, Art: []artwork{{ID: "low", Creator: "a", Kind: "poster"}}}}}
 	got = p.selectArt(b, p.snapshot(), "poster", 0, 0, false)
 	if len(got) != 1 || got[0].ID != "high" || got[0].Creator != "z" {
 		t.Fatalf("unpreferred rank=%#v", got)
@@ -73,7 +73,7 @@ func TestSeriesFetchCachedAndGraphQLErrorsFail(t *testing.T) {
 			t.Error("missing bearer")
 		}
 		w.Header().Set("Content-Type", "application/json")
-		_, _ = w.Write([]byte(`{"data":{"shows_by_id":{"show_sets":[{"id":"x","popularity":3,"user_created":{"username":"one"},"show_poster":[{"id":"poster","modified_on":"2023-12-14T12:45:51.000Z"}],"show_backdrop":[],"season_posters":[{"id":"s0","modified_on":"2023-12-14T12:45:30.000Z","season":{"season_number":0}}],"titlecards":[{"id":"e","modified_on":"2023-12-16T12:54:02.000Z","episode":{"episode_number":2,"season_id":{"season_number":0}}}],"files":[]}]}}}`))
+		_, _ = w.Write([]byte(`{"data":{"shows_by_id":{"show_sets":[{"id":"x","popularity_global":3,"user_created":{"username":"one"},"show_poster":[{"id":"poster","modified_on":"2023-12-14T12:45:51.000Z"}],"show_backdrop":[],"season_posters":[{"id":"s0","modified_on":"2023-12-14T12:45:30.000Z","season":{"season_number":0}}],"titlecards":[{"id":"e","modified_on":"2023-12-16T12:54:02.000Z","episode":{"episode_number":2,"season_id":{"season_number":0}}}],"files":[]}]}}}`))
 	}))
 	defer srv.Close()
 	p := newProvider()
@@ -99,7 +99,7 @@ func TestSeriesFetchCachedAndGraphQLErrorsFail(t *testing.T) {
 }
 
 func TestParseLiveShapeArraysAndModifiedVersion(t *testing.T) {
-	raw := json.RawMessage(`{"shows_by_id":{"id":"1399","show_sets":[{"id":"493","popularity":19,"user_created":{"username":"Aloha_Alona"},"show_poster":[{"id":"295df690-c7c9-42f5-8496-0d2088c521f1","modified_on":"2023-12-14T12:45:51.000Z","language":{"display_name":"English"}}],"show_backdrop":[{"id":"ec1c004a-ed29-4406-9d69-c8cfe277e0cc","modified_on":"2023-12-14T12:51:22.000Z"}],"season_posters":[{"id":"1c3ba710-ec6e-4aaf-8c4c-57923070d2e9","modified_on":"2023-12-14T12:45:30.000Z","season":{"season_number":1}}],"titlecards":[{"id":"01dd338d-230c-44de-82db-770c69b97609","modified_on":"2023-12-16T12:54:02.000Z","episode":{"episode_number":6,"season_id":{"season_number":4}}}],"files":[]}]}}`)
+	raw := json.RawMessage(`{"shows_by_id":{"id":"1399","show_sets":[{"id":"493","popularity_global":19,"user_created":{"username":"Aloha_Alona"},"show_poster":[{"id":"295df690-c7c9-42f5-8496-0d2088c521f1","modified_on":"2023-12-14T12:45:51.000Z","language":{"display_name":"English"}}],"show_backdrop":[{"id":"ec1c004a-ed29-4406-9d69-c8cfe277e0cc","modified_on":"2023-12-14T12:51:22.000Z"}],"season_posters":[{"id":"1c3ba710-ec6e-4aaf-8c4c-57923070d2e9","modified_on":"2023-12-14T12:45:30.000Z","season":{"season_number":1}}],"titlecards":[{"id":"01dd338d-230c-44de-82db-770c69b97609","modified_on":"2023-12-16T12:54:02.000Z","episode":{"episode_number":6,"season_id":{"season_number":4}}}],"files":[]}]}}`)
 	b, err := parseBundle(raw, "series", "1399")
 	if err != nil || len(b.Sets) != 1 || len(b.Sets[0].Art) != 4 {
 		t.Fatalf("parse: %#v %v", b, err)
@@ -126,7 +126,7 @@ func TestNormalizeLanguage(t *testing.T) {
 func TestBestOnlyUsesLanguageTierAfterCreatorRank(t *testing.T) {
 	p := newProvider()
 	p.configure(map[string]any{"api_token": "safe", "priority_creators": "", "cache_hours": 24, "image_selection": "BestOnly"})
-	b := bundle{Sets: []set{{Creator: "high", Popularity: 100, Art: []artwork{{ID: "neutral", Creator: "high", Kind: "poster", Popularity: 100}}}, {Creator: "low", Popularity: 1, Art: []artwork{{ID: "english", Creator: "low", Kind: "poster", Popularity: 1, Language: "en"}}}, {Creator: "preferred", Popularity: 1, Art: []artwork{{ID: "english-preferred", Creator: "preferred", Kind: "poster", Popularity: 1, Language: "en"}}}}}
+	b := bundle{Sets: []set{{Creator: "high", GlobalRank: 1, Art: []artwork{{ID: "neutral", Creator: "high", Kind: "poster", GlobalRank: 1}}}, {Creator: "low", GlobalRank: 100, Art: []artwork{{ID: "english", Creator: "low", Kind: "poster", GlobalRank: 100, Language: "en"}}}, {Creator: "preferred", GlobalRank: 100, Art: []artwork{{ID: "english-preferred", Creator: "preferred", Kind: "poster", GlobalRank: 100, Language: "en"}}}}}
 	p.configure(map[string]any{"api_token": "safe", "priority_creators": "preferred", "cache_hours": 24, "image_selection": "BestOnly"})
 	candidates := p.selectArt(b, p.snapshot(), "poster", 0, 0, true)
 	chosen := bestForLanguage(candidates, "poster", "en")
@@ -147,7 +147,7 @@ func TestAutomaticArtworkStaysInWinningSeriesSet(t *testing.T) {
 	p.configure(map[string]any{"season_consistency": "SeriesPoster", "titlecard_consistency": "SeriesPoster"})
 	p.configure(map[string]any{"api_token": "safe", "cache_hours": 24, "image_selection": "BestOnly"})
 	b := bundle{Sets: []set{
-		{ID: "set-a", Creator: "same", Popularity: 10, Art: []artwork{
+		{ID: "set-a", Creator: "same", GlobalRank: 91, Art: []artwork{
 			{ID: "series-a", Kind: "poster", SetID: "set-a", Language: "en"},
 			{ID: "backdrop-a", Kind: "backdrop", SetID: "set-a"},
 			{ID: "logo-a", Kind: "logo", SetID: "set-a", Language: "en"},
@@ -155,7 +155,7 @@ func TestAutomaticArtworkStaysInWinningSeriesSet(t *testing.T) {
 			{ID: "special-a", Kind: "season", SetID: "set-a", Season: 0, Language: "en"},
 			{ID: "episode-a", Kind: "still", SetID: "set-a", Season: 5, Episode: 1},
 		}},
-		{ID: "set-b", Creator: "same", Popularity: 100, Art: []artwork{
+		{ID: "set-b", Creator: "same", GlobalRank: 1, Art: []artwork{
 			{ID: "series-b", Kind: "poster", SetID: "set-b", Language: "fr"},
 			{ID: "backdrop-b", Kind: "backdrop", SetID: "set-b"},
 			{ID: "logo-b", Kind: "logo", SetID: "set-b", Language: "es"},
@@ -193,8 +193,8 @@ func TestServiceUsesSetAnchorButAllGalleryRemainsComplete(t *testing.T) {
 	p.configure(map[string]any{"season_consistency": "SeriesPoster", "titlecard_consistency": "SeriesPoster"})
 	p.configure(map[string]any{"api_token": "safe", "cache_hours": 24, "image_selection": "BestOnly"})
 	b := bundle{Sets: []set{
-		{ID: "a", Popularity: 1, Art: []artwork{{ID: "poster-a", Kind: "poster", SetID: "a", Language: "en"}, {ID: "season-a", Kind: "season", SetID: "a", Season: 5, Language: "en"}}},
-		{ID: "b", Popularity: 100, Art: []artwork{{ID: "poster-b", Kind: "poster", SetID: "b", Language: "fr"}, {ID: "season-b", Kind: "season", SetID: "b", Season: 5, Language: "es"}}},
+		{ID: "a", GlobalRank: 100, Art: []artwork{{ID: "poster-a", Kind: "poster", SetID: "a", Language: "en"}, {ID: "season-a", Kind: "season", SetID: "a", Season: 5, Language: "en"}}},
+		{ID: "b", GlobalRank: 1, Art: []artwork{{ID: "poster-b", Kind: "poster", SetID: "b", Language: "fr"}, {ID: "season-b", Kind: "season", SetID: "b", Season: 5, Language: "es"}}},
 	}}
 	cacheBundle := func() {
 		p.mu.Lock()
@@ -235,7 +235,7 @@ func TestGetImages_GalleryPurposeReturnsAllEligibleArtwork(t *testing.T) {
 		"only_priority_creators": true,
 	})
 	b := bundle{Sets: []set{
-		{ID: "fav", Creator: "fav", Popularity: 1, Art: []artwork{
+		{ID: "fav", Creator: "fav", GlobalRank: 100, Art: []artwork{
 			{ID: "poster-fav-1", Kind: "poster", SetID: "fav"},
 			{ID: "poster-fav-2", Kind: "poster", SetID: "fav"},
 			{ID: "backdrop-fav-1", Kind: "backdrop", SetID: "fav"},
@@ -247,12 +247,12 @@ func TestGetImages_GalleryPurposeReturnsAllEligibleArtwork(t *testing.T) {
 			{ID: "special-fav-1", Kind: "season", SetID: "fav", Season: 0},
 			{ID: "special-fav-2", Kind: "season", SetID: "fav", Season: 0},
 		}},
-		{ID: "blocked", Creator: "blocked", Popularity: 100, Art: []artwork{
+		{ID: "blocked", Creator: "blocked", GlobalRank: 1, Art: []artwork{
 			{ID: "poster-blocked", Kind: "poster", SetID: "blocked"},
 			{ID: "season1-blocked", Kind: "season", SetID: "blocked", Season: 1},
 			{ID: "special-blocked", Kind: "season", SetID: "blocked", Season: 0},
 		}},
-		{ID: "other", Creator: "other", Popularity: 99, Art: []artwork{
+		{ID: "other", Creator: "other", GlobalRank: 2, Art: []artwork{
 			{ID: "poster-other", Kind: "poster", SetID: "other"},
 			{ID: "season1-other", Kind: "season", SetID: "other", Season: 1},
 			{ID: "special-other", Kind: "season", SetID: "other", Season: 0},
@@ -294,8 +294,8 @@ func TestGetImages_GalleryPurposeDoesNotChangeAutomaticSelection(t *testing.T) {
 	p := newProvider()
 	p.configure(map[string]any{"api_token": "safe", "image_selection": "BestOnly"})
 	b := bundle{Sets: []set{
-		{ID: "preferred", Creator: "preferred", Popularity: 1, Art: []artwork{{ID: "preferred", Kind: "poster", SetID: "preferred"}}},
-		{ID: "popular", Creator: "popular", Popularity: 100, Art: []artwork{{ID: "popular", Kind: "poster", SetID: "popular"}}},
+		{ID: "preferred", Creator: "preferred", GlobalRank: 100, Art: []artwork{{ID: "preferred", Kind: "poster", SetID: "preferred"}}},
+		{ID: "popular", Creator: "popular", GlobalRank: 1, Art: []artwork{{ID: "popular", Kind: "poster", SetID: "popular"}}},
 	}}
 	p.cache[fmt.Sprintf("%d:movie:1", p.generation)] = cacheEntry{b: b, until: time.Now().Add(time.Hour)}
 	s := &server{p: p}
@@ -329,11 +329,11 @@ func TestEpisodesUseLanguageMatchedSeriesSet(t *testing.T) {
 	p.configure(map[string]any{"season_consistency": "SeriesPoster", "titlecard_consistency": "SeriesPoster"})
 	p.configure(map[string]any{"api_token": "safe", "cache_hours": 24, "image_selection": "BestOnly"})
 	b := bundle{Sets: []set{
-		{ID: "english", Popularity: 100, Art: []artwork{
+		{ID: "english", GlobalRank: 1, Art: []artwork{
 			{ID: "poster-en", Kind: "poster", SetID: "english", Language: "en"},
 			{ID: "still-en", Kind: "still", SetID: "english", Season: 1, Episode: 1, Language: "en"},
 		}},
-		{ID: "german", Popularity: 1, Art: []artwork{
+		{ID: "german", GlobalRank: 100, Art: []artwork{
 			{ID: "poster-de", Kind: "poster", SetID: "german", Language: "de"},
 			{ID: "still-de", Kind: "still", SetID: "german", Season: 1, Episode: 1, Language: "de"},
 		}},
@@ -358,7 +358,7 @@ func TestTitlecardLanguageWithinSelectedSetAndCreatorPriority(t *testing.T) {
 			{ID: "z-en", Kind: "still", SetID: "selected", Season: 1, Episode: 1, Language: "en"},
 			{ID: "n-neutral", Kind: "still", SetID: "selected", Season: 1, Episode: 1},
 		}},
-		{ID: "fallback", Creator: "other", Popularity: 100, Art: []artwork{
+		{ID: "fallback", Creator: "other", GlobalRank: 1, Art: []artwork{
 			{ID: "0-en", Kind: "still", SetID: "fallback", Season: 1, Episode: 1, Language: "en"},
 		}},
 	}}

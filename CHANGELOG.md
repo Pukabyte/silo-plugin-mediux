@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Rank sets by Mediux `popularity_global`, where 1 is best. Automatic selection and season and title-card consistency previously treated the rank as a score and preferred the lowest-ranked set from the same creator, and manual galleries listed it first. The global rank also lets movie and collection sets compare on one scale. Unranked sets still sort last.
+
 ## 0.1.10
 
 - Report Mediux GraphQL error messages, error codes and field paths for artwork requests and TVDB identity lookups, including which operation failed. Diagnostics redact the configured token and bearer credentials, omit upstream stacks, and limit output size.

@@ -41,6 +41,8 @@ Silo decides whether to resolve references directly or download/cache image vari
 
 Creator matching is case-insensitive. Exclusions and prioritized-only filtering apply before artwork candidates are ranked. Automatic series-poster selection follows language tiers; backdrops/logos prefer that series set. Season posters and title cards independently compute their selected set once per response.
 
+Sets are ranked by Mediux `popularity_global`, a rank among all Mediux sets, not a score: 1 is the best set. Unlike `popularity`, which ranks a set only among the sets of one title, the global rank puts movie, collection and show sets on one scale, so a creator's movie set and collection set compare correctly. Within the same creator rank, sets sort by ascending rank, and unranked sets (0 or null) sort after every ranked set. This matches the ordering in Mediux's own AURA client.
+
 `CreatorPriority` ranks creator order before unique scope coverage. `MostComplete` prefers complete candidates, then creator order; incomplete candidates rank by creator order before coverage. Duplicate artwork does not improve a set's coverage. Language, popularity and set ID break coverage ties. Title-card variants preserve creator priority, then prefer the requested language, English, neutral artwork, and other languages; UUID order does not override that language preference. Gap handling returns another eligible set's artwork or no Mediux replacement.
 
 Completeness is measured against the union of artwork scopes returned by Mediux. The SDK does not expose Silo's local child inventory here; future-season artwork can affect coverage. Explicit set pinning, anchoring to a manually chosen poster and episode-gallery lookup are outside the current contract.

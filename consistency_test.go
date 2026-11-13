@@ -23,13 +23,13 @@ func TestMostCompleteConsistencyIsIndependentByArtworkKind(t *testing.T) {
 	p := newProvider()
 	cfg := settings{SeasonConsistency: "MostComplete", TitlecardConsistency: "MostComplete"}
 	b := bundle{Sets: []set{
-		{ID: "seasons", Creator: "one", Popularity: 1, Art: []artwork{
+		{ID: "seasons", Creator: "one", GlobalRank: 100, Art: []artwork{
 			consistencyArt(1, "season", "seasons", 0, 0, "en"),
 			consistencyArt(2, "season", "seasons", 1, 0, "en"),
 			consistencyArt(3, "season", "seasons", 2, 0, "en"),
 			consistencyArt(4, "still", "seasons", 1, 1, "en"),
 		}},
-		{ID: "cards", Creator: "two", Popularity: 100, Art: []artwork{
+		{ID: "cards", Creator: "two", GlobalRank: 1, Art: []artwork{
 			consistencyArt(5, "season", "cards", 1, 0, "en"),
 			consistencyArt(6, "still", "cards", 1, 1, "en"),
 			consistencyArt(7, "still", "cards", 1, 2, "en"),
@@ -48,7 +48,7 @@ func TestMostCompleteCountsOnlyUniqueValidScopes(t *testing.T) {
 	p := newProvider()
 	cfg := settings{SeasonConsistency: "MostComplete", TitlecardConsistency: "MostComplete"}
 	b := bundle{Sets: []set{
-		{ID: "duplicates", Creator: "one", Popularity: 100, Art: []artwork{
+		{ID: "duplicates", Creator: "one", GlobalRank: 1, Art: []artwork{
 			consistencyArt(10, "season", "duplicates", 1, 0, "en"),
 			consistencyArt(11, "season", "duplicates", 1, 0, "en"),
 			{ID: "", Kind: "season", SetID: "duplicates", Season: 2, Language: "en"},
@@ -57,7 +57,7 @@ func TestMostCompleteCountsOnlyUniqueValidScopes(t *testing.T) {
 			consistencyArt(14, "still", "duplicates", 1, 1, "en"),
 			consistencyArt(15, "still", "duplicates", 1, 0, "en"),
 		}},
-		{ID: "complete", Creator: "two", Popularity: 1, Art: []artwork{
+		{ID: "complete", Creator: "two", GlobalRank: 100, Art: []artwork{
 			consistencyArt(16, "season", "complete", 1, 0, "en"),
 			consistencyArt(17, "season", "complete", 2, 0, "en"),
 			consistencyArt(18, "still", "complete", 1, 1, "en"),
@@ -128,17 +128,17 @@ func TestFullCoverageBeatsIncompletePriorityThenFallsBackWhenExcluded(t *testing
 func TestCreatorPriorityConsistencyPrefersRankedCreatorThenFillsMissingScopes(t *testing.T) {
 	p := newProvider()
 	b := bundle{Sets: []set{
-		{ID: "preferred", Creator: "preferred", Popularity: 1, Art: []artwork{
+		{ID: "preferred", Creator: "preferred", GlobalRank: 100, Art: []artwork{
 			consistencyArt(100, "season", "preferred", 1, 0, "en"),
 			consistencyArt(101, "still", "preferred", 1, 1, "en"),
 		}},
-		{ID: "complete", Creator: "other", Popularity: 100, Art: []artwork{
+		{ID: "complete", Creator: "other", GlobalRank: 1, Art: []artwork{
 			consistencyArt(102, "season", "complete", 1, 0, "de"),
 			consistencyArt(103, "season", "complete", 2, 0, "de"),
 			consistencyArt(104, "still", "complete", 1, 1, "de"),
 			consistencyArt(105, "still", "complete", 1, 2, "de"),
 		}},
-		{ID: "fallback", Creator: "third", Popularity: 2, Art: []artwork{
+		{ID: "fallback", Creator: "third", GlobalRank: 99, Art: []artwork{
 			consistencyArt(106, "season", "fallback", 2, 0, "en"),
 			consistencyArt(107, "still", "fallback", 1, 2, "en"),
 		}},
@@ -258,10 +258,10 @@ func TestConsistencyFallbackAndKeepExisting(t *testing.T) {
 func TestConsistencyTieBreakingAndModes(t *testing.T) {
 	p := newProvider()
 	b := bundle{Sets: []set{
-		{ID: "zeta", Creator: "same", Popularity: 9, Art: []artwork{
+		{ID: "zeta", Creator: "same", GlobalRank: 92, Art: []artwork{
 			consistencyArt(50, "poster", "zeta", 0, 0, "en"), consistencyArt(51, "season", "zeta", 1, 0, "en"), consistencyArt(52, "still", "zeta", 1, 1, "en"),
 		}},
-		{ID: "alpha", Creator: "same", Popularity: 9, Art: []artwork{
+		{ID: "alpha", Creator: "same", GlobalRank: 92, Art: []artwork{
 			consistencyArt(53, "poster", "alpha", 0, 0, "en"), consistencyArt(54, "season", "alpha", 1, 0, "en"), consistencyArt(55, "still", "alpha", 1, 1, "en"),
 		}},
 	}}
@@ -340,12 +340,12 @@ func TestSeasonAndEpisodeRPCsUseSeparateMostCompleteSets(t *testing.T) {
 		"missing_artwork":       "Fallback",
 	})
 	b := bundle{Sets: []set{
-		{ID: "season-set", Creator: "seasons", Popularity: 1, Art: []artwork{
+		{ID: "season-set", Creator: "seasons", GlobalRank: 100, Art: []artwork{
 			consistencyArt(70, "season", "season-set", 1, 0, "en"),
 			consistencyArt(71, "season", "season-set", 2, 0, "en"),
 			consistencyArt(72, "still", "season-set", 1, 1, "en"),
 		}},
-		{ID: "titlecard-set", Creator: "cards", Popularity: 100, Art: []artwork{
+		{ID: "titlecard-set", Creator: "cards", GlobalRank: 1, Art: []artwork{
 			consistencyArt(73, "season", "titlecard-set", 1, 0, "en"),
 			consistencyArt(74, "still", "titlecard-set", 1, 1, "en"),
 			consistencyArt(75, "still", "titlecard-set", 1, 2, "en"),

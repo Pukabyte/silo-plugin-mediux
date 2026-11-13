@@ -58,17 +58,31 @@ func splitSet(s string) map[string]int {
 	return out
 }
 
+// mediuxRank is a set's Mediux popularity_global: its rank among all Mediux
+// sets, so movie, collection and show sets compare on one scale. 1 is the best
+// set; 0 (null in the API) means the set is unranked.
+type mediuxRank float64
+
+// before reports whether r ranks ahead of o. Unranked sets go after every
+// ranked set, as in Mediux's own client.
+func (r mediuxRank) before(o mediuxRank) bool {
+	if r <= 0 {
+		return false
+	}
+	return o <= 0 || r < o
+}
+
 type artwork struct {
 	ID, Creator, Kind, SetID string
 	Season, Episode          int
-	Popularity               float64
+	GlobalRank               mediuxRank
 	Modified                 time.Time
 	Rank                     int
 	Language                 string
 }
 type set struct {
 	ID, Creator string
-	Popularity  float64
+	GlobalRank  mediuxRank
 	Art         []artwork
 }
 type bundle struct{ Sets []set }
@@ -247,8 +261,8 @@ func (p *provider) resolveTVDB(ctx context.Context, typ, tvdb string) (string, e
 	return out.Data[entity][0].ID, nil
 }
 
-const showQuery = `query($tmdb_id: ID!){shows_by_id(id:$tmdb_id){id show_sets(limit:-1){ id popularity user_created{username} show_poster(limit:-1){id modified_on language{display_name}} show_backdrop(limit:-1){id modified_on language{display_name}} season_posters(limit:-1){ id modified_on language{display_name} season{season_number}} titlecards(limit:-1){id modified_on language{display_name} episode{episode_number season_id{season_number}}} files(limit:-1){ id file_type modified_on language{display_name} }}}}`
-const movieQuery = `query($tmdb_id: ID!){movies_by_id(id:$tmdb_id){id movie_sets(limit:-1){id popularity user_created{username} movie_poster(limit:-1){id modified_on language{display_name}} movie_backdrop(limit:-1){id modified_on language{display_name}} files(limit:-1){id file_type modified_on language{display_name}}} posters(limit:-1,filter:{collection_set:{id:{_nnull:true}}}){id modified_on language{display_name} movie{id} collection_set{id popularity user_created{username}}} backdrops(limit:-1,filter:{collection_set:{id:{_nnull:true}}}){id modified_on language{display_name} movie{id} collection_set{id popularity user_created{username}}}}}`
+const showQuery = `query($tmdb_id: ID!){shows_by_id(id:$tmdb_id){id show_sets(limit:-1){ id popularity_global user_created{username} show_poster(limit:-1){id modified_on language{display_name}} show_backdrop(limit:-1){id modified_on language{display_name}} season_posters(limit:-1){ id modified_on language{display_name} season{season_number}} titlecards(limit:-1){id modified_on language{display_name} episode{episode_number season_id{season_number}}} files(limit:-1){ id file_type modified_on language{display_name} }}}}`
+const movieQuery = `query($tmdb_id: ID!){movies_by_id(id:$tmdb_id){id movie_sets(limit:-1){id popularity_global user_created{username} movie_poster(limit:-1){id modified_on language{display_name}} movie_backdrop(limit:-1){id modified_on language{display_name}} files(limit:-1){id file_type modified_on language{display_name}}} posters(limit:-1,filter:{collection_set:{id:{_nnull:true}}}){id modified_on language{display_name} movie{id} collection_set{id popularity_global user_created{username}}} backdrops(limit:-1,filter:{collection_set:{id:{_nnull:true}}}){id modified_on language{display_name} movie{id} collection_set{id popularity_global user_created{username}}}}}`
 
 func (p *provider) fetch(ctx context.Context, typ, id string) (bundle, error) {
 	cfg := p.snapshot()
@@ -328,8 +342,8 @@ func parseBundle(raw json.RawMessage, typ, expectedID string) (bundle, error) {
 		return bundle{}, errors.New("Mediux identity mismatch")
 	}
 	var rows []struct {
-		ID         string  `json:"id"`
-		Popularity float64 `json:"popularity"`
+		ID         string     `json:"id"`
+		GlobalRank mediuxRank `json:"popularity_global"`
 		User       struct {
 			Username string `json:"username"`
 		} `json:"user_created"`
@@ -398,11 +412,11 @@ func parseBundle(raw json.RawMessage, typ, expectedID string) (bundle, error) {
 	}
 	b := bundle{}
 	for _, r := range rows {
-		s := set{r.ID, r.User.Username, r.Popularity, nil}
+		s := set{r.ID, r.User.Username, r.GlobalRank, nil}
 		add := func(id, modified, language, k string, season, episode int) {
 			if id != "" {
 				at, _ := time.Parse(time.RFC3339Nano, modified)
-				s.Art = append(s.Art, artwork{ID: id, Creator: r.User.Username, Kind: k, SetID: r.ID, Season: season, Episode: episode, Popularity: r.Popularity, Modified: at, Language: normalizeLanguage(language)})
+				s.Art = append(s.Art, artwork{ID: id, Creator: r.User.Username, Kind: k, SetID: r.ID, Season: season, Episode: episode, GlobalRank: r.GlobalRank, Modified: at, Language: normalizeLanguage(language)})
 			}
 		}
 		for _, a := range r.MoviePoster {
@@ -443,6 +457,7 @@ func parseBundle(raw json.RawMessage, typ, expectedID string) (bundle, error) {
 	}
 	return b, nil
 }
+
 func (p *provider) selectArt(b bundle, cfg settings, kind string, season, episode int, all bool) []artwork {
 	priority, excluded := splitSet(cfg.Priority), splitSet(cfg.Excluded)
 	var out []artwork
@@ -455,7 +470,7 @@ func (p *provider) selectArt(b bundle, cfg settings, kind string, season, episod
 			if a.Kind != kind || a.Season != season || a.Episode != episode {
 				continue
 			}
-			a.Popularity = s.Popularity
+			a.GlobalRank = s.GlobalRank
 			a.Rank = 99999999
 			if ok {
 				a.Rank = rank
@@ -467,8 +482,8 @@ func (p *provider) selectArt(b bundle, cfg settings, kind string, season, episod
 		if out[i].Rank != out[j].Rank {
 			return out[i].Rank < out[j].Rank
 		}
-		if out[i].Popularity != out[j].Popularity {
-			return out[i].Popularity > out[j].Popularity
+		if ahead, behind := out[i].GlobalRank.before(out[j].GlobalRank), out[j].GlobalRank.before(out[i].GlobalRank); ahead || behind {
+			return ahead
 		}
 		return out[i].ID < out[j].ID
 	})
