@@ -41,9 +41,18 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version-file: go.mod
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: '22'
+      - name: Generate Artwork Manager fixture
+        env:
+          ARTWORK_MANAGER_TEST_HTML: ${{ runner.temp }}/artwork-manager-test.html
+        run: |
+          go test -run '^TestArtworkManagerAccessAndLegacyRoutes$' .
+          test -s "$ARTWORK_MANAGER_TEST_HTML"
       - name: Prepare existing browser test tooling
         run: |
           npm install --prefix "$RUNNER_TEMP/mediux-ui" --no-save --ignore-scripts playwright@1.62.1
@@ -51,4 +60,5 @@ jobs:
       - name: Check plugin pages
         env:
           NODE_PATH: ${{ runner.temp }}/mediux-ui/node_modules
+          ARTWORK_MANAGER_TEST_HTML: ${{ runner.temp }}/artwork-manager-test.html
         run: node --test tests/*.cjs
