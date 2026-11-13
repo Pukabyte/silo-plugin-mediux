@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.1.18
 
 - Rank sets by Mediux `popularity_global`, where 1 is best. Automatic selection, season and title-card consistency, and Artwork Manager galleries now put better-ranked sets first; unranked sets sort last.
 - Build with Go 1.26.11 to resolve standard-library security advisories.
