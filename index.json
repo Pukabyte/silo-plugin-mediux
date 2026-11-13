@@ -3,7 +3,7 @@
     {
       "manifest": {
         "plugin_id": "community.mediux",
-        "version": "0.1.10",
+        "version": "0.1.18",
         "silo_api_version": "v1",
         "presentation": {
           "display_name": "Mediux Artwork",
@@ -92,6 +92,24 @@
               ]
             },
             "description": "Configure your API token here. Use Mediux artwork settings in the plugin menu or admin sidebar for creator priorities and artwork preferences."
+          },
+          {
+            "key": "collection_connection",
+            "title": "Collection connection",
+            "required": false,
+            "description": "Optional connection for plugin-owned collection artwork management. Use a dedicated administrator API key for this Silo instance; the host stores it encrypted. The plugin obtains this host's internal API URL through the SDK.",
+            "json_schema": "{\"type\":\"object\",\"properties\":{\"api_key\":{\"type\":\"string\",\"minLength\":1}},\"additionalProperties\":false}",
+            "admin_form": {
+              "fields": [
+                {
+                  "key": "api_key",
+                  "label": "Silo API key",
+                  "control": 3,
+                  "secret": true,
+                  "required": false
+                }
+              ]
+            }
           }
         ],
         "http_routes": [
@@ -121,23 +139,124 @@
             "method": "PUT",
             "path": "/settings/config",
             "access": "admin"
+          },
+          {
+            "id": "collection-artwork",
+            "method": "GET",
+            "path": "/collection-artwork",
+            "access": "admin"
+          },
+          {
+            "id": "collection-manager",
+            "method": "GET",
+            "path": "/collections",
+            "access": "admin",
+            "navigable": false
+          },
+          {
+            "id": "collection-manager-style",
+            "method": "GET",
+            "path": "/ui.css",
+            "access": "admin"
+          },
+          {
+            "id": "collection-catalog",
+            "method": "GET",
+            "path": "/collections/catalog",
+            "access": "admin"
+          },
+          {
+            "id": "collection-item",
+            "method": "GET",
+            "path": "/collections/item",
+            "access": "admin"
+          },
+          {
+            "id": "collection-apply-cover",
+            "method": "POST",
+            "path": "/collections/cover",
+            "access": "admin"
+          },
+          {
+            "id": "mediux-set-manager",
+            "method": "GET",
+            "path": "/sets",
+            "access": "admin",
+            "navigable": false
+          },
+          {
+            "id": "mediux-set-catalog",
+            "method": "GET",
+            "path": "/sets/catalog",
+            "access": "admin"
+          },
+          {
+            "id": "mediux-set-preferences-read",
+            "method": "GET",
+            "path": "/sets/preferences",
+            "access": "admin"
+          },
+          {
+            "id": "mediux-set-preferences-save",
+            "method": "PUT",
+            "path": "/sets/preferences",
+            "access": "admin"
+          },
+          {
+            "id": "mediux-set-library-search",
+            "method": "GET",
+            "path": "/sets/items",
+            "access": "admin"
+          },
+          {
+            "id": "mediux-set-library-item",
+            "method": "GET",
+            "path": "/sets/item",
+            "access": "admin"
+          },
+          {
+            "id": "mediux-collection-discovery",
+            "method": "GET",
+            "path": "/collections/discover",
+            "access": "admin"
+          },
+          {
+            "id": "mediux-set-plan",
+            "method": "POST",
+            "path": "/sets/plan",
+            "access": "admin"
+          },
+          {
+            "id": "mediux-set-apply",
+            "method": "POST",
+            "path": "/sets/apply",
+            "access": "admin"
+          },
+          {
+            "id": "artwork-manager",
+            "method": "GET",
+            "path": "/artwork",
+            "access": "admin",
+            "navigable": true,
+            "navigation_label": "Artwork Manager",
+            "navigation_kind": "admin"
           }
         ]
       },
       "repo_url": "https://github.com/Pukabyte/silo-plugin-mediux",
-      "checksums_url": "https://github.com/Pukabyte/silo-plugin-mediux/releases/download/v0.1.10/checksums.txt",
+      "checksums_url": "https://github.com/Pukabyte/silo-plugin-mediux/releases/download/v0.1.18/checksums.txt",
       "binaries": {
         "linux/amd64": {
-          "url": "https://github.com/Pukabyte/silo-plugin-mediux/releases/download/v0.1.10/plugin-linux-amd64",
-          "checksum": "3781cf0857d7b7b7d1e86334f7245fdb632ab79b3adf4e0ff28f5de7b706cc6d"
+          "url": "https://github.com/Pukabyte/silo-plugin-mediux/releases/download/v0.1.18/plugin-linux-amd64",
+          "checksum": "cfa05f32dbc21b9f8fdcf9b513c36c13d5989fcf322f0f5de93bd110b38290da"
         },
         "linux/arm64": {
-          "url": "https://github.com/Pukabyte/silo-plugin-mediux/releases/download/v0.1.10/plugin-linux-arm64",
-          "checksum": "4eaa18323bf9df0b1a6c135a63d856410cf73b7a57f368d74f42dd697b4bb1ca"
+          "url": "https://github.com/Pukabyte/silo-plugin-mediux/releases/download/v0.1.18/plugin-linux-arm64",
+          "checksum": "962bfb6cfcee1aafc241e6d3e254f16f2287d7a73dac9edc4abdc6e56b45bad4"
         },
         "darwin/arm64": {
-          "url": "https://github.com/Pukabyte/silo-plugin-mediux/releases/download/v0.1.10/plugin-darwin-arm64",
-          "checksum": "141a425d11f7705215fb77c5d4fac33f5a14c25f1d0bc0f9c404454ee0f2cf90"
+          "url": "https://github.com/Pukabyte/silo-plugin-mediux/releases/download/v0.1.18/plugin-darwin-arm64",
+          "checksum": "5e4d718056c6e2c90fece7421637cab1be0d7ce1dc6ea2e8fc9aecd13743f2d3"
         }
       }
     }
