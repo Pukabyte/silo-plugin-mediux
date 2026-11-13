@@ -48,7 +48,7 @@ jobs:
         run: |
           npm install --prefix "$RUNNER_TEMP/mediux-ui" --no-save --ignore-scripts playwright@1.62.1
           "$RUNNER_TEMP/mediux-ui/node_modules/.bin/playwright" install --with-deps chromium
-      - name: Check settings page
+      - name: Check plugin pages
         env:
           NODE_PATH: ${{ runner.temp }}/mediux-ui/node_modules
-        run: node tests/settings-ui.test.cjs
+        run: node --test tests/*.cjs

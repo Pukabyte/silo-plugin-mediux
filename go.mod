@@ -1,6 +1,6 @@
 module github.com/Pukabyte/silo-plugin-mediux
 
-go 1.26.9
+go 1.26.11
 
 require (
 	github.com/Silo-Server/silo-plugin-sdk v0.24.0

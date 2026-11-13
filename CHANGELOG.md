@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Rank sets by Mediux `popularity_global`, where 1 is best. Automatic selection, season and title-card consistency, and Artwork Manager galleries now put better-ranked sets first; unranked sets sort last.
+- Build with Go 1.26.11 to resolve standard-library security advisories.
+
 ## 0.1.17
 
 - Show all returned set images through paged catalog requests instead of eight per type.
@@ -38,9 +43,6 @@
 
 - Add administrator-only discovery of movie collection cover posters and backdrops. Results include stable remote HTTPS URLs, respect creator preferences, and exclude member-movie artwork. Silo owns selection and assignment.
 - Genre/category packs on the Mediux website are not exposed by the verified authenticated API schema; this release does not scrape them or substitute movie artwork.
-## Unreleased
-
-- Rank sets by Mediux `popularity_global`, where 1 is best. Automatic selection and season and title-card consistency previously treated the rank as a score and preferred the lowest-ranked set from the same creator, and manual galleries listed it first. The global rank also lets movie and collection sets compare on one scale. Unranked sets still sort last.
 
 ## 0.1.10
 
