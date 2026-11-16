@@ -25,6 +25,13 @@ func TestManifestLoads(t *testing.T) {
 	if got := m.GetCapabilities()[0].GetMetadata().GetFields()["lookup_provider_ids"].GetListValue().GetValues(); len(got) != 2 || got[0].GetStringValue() != "tmdb" || got[1].GetStringValue() != "tvdb" {
 		t.Fatal("metadata lookup provider IDs missing")
 	}
+	fields := m.GetCapabilities()[0].GetMetadata().GetFields()
+	if !fields["lookup_images"].GetBoolValue() {
+		t.Fatal("upstream image lookup capability missing")
+	}
+	if _, ok := fields["image_lookup_provider_ids"]; ok {
+		t.Fatal("superseded image lookup capability still declared")
+	}
 }
 
 func TestResolverNeverLeaksToken(t *testing.T) {

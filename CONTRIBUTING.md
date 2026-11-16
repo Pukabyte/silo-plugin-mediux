@@ -27,6 +27,6 @@ After transfer and approval, configure `SILO_PLUGINS_DISPATCH_TOKEN` as a fine-g
 
 ## Validation limits
 
-Linux amd64 is runtime-tested. Linux arm64 and macOS arm64 are cross-built. Cache-enabled end-to-end delivery remains unverified. Metadata refresh works independently of manual gallery support; the host must forward the Mediux identity or honor `image_lookup_provider_ids`. The episode gallery request does not provide an episode number.
+Linux amd64 is runtime-tested. Linux arm64 and macOS arm64 are cross-built. Cache-enabled end-to-end delivery remains unverified. External-ID image lookup requires Silo's `lookup_images` support (PR #3145, commit `1556ddb`); older hosts must forward the Mediux identity. Native picker requests without the optional custom request-purpose header use the configured selection policy, so BestOnly can show one image per kind. The plugin-owned Artwork Manager does not require this header. The episode gallery request does not provide an episode number.
 
 See [DESIGN.md](DESIGN.md) for API, cache, resolver and settings implementation details.

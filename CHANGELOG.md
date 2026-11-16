@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Use upstream Silo's `lookup_images: true` with the existing TMDB/TVDB `lookup_provider_ids`, replacing the custom `image_lookup_provider_ids` declaration. This enables image lookup on hosts with Silo PR #3145 without a custom capability patch. Refresh selection and optional gallery-purpose handling remain unchanged.
+
 ## 0.1.18
 
 - Rank sets by Mediux `popularity_global`, where 1 is best. Automatic selection, season and title-card consistency, and Artwork Manager galleries now put better-ranked sets first; unranked sets sort last.
