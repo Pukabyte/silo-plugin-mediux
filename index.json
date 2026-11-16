@@ -3,7 +3,7 @@
     {
       "manifest": {
         "plugin_id": "community.mediux",
-        "version": "0.1.18",
+        "version": "0.1.19",
         "silo_api_version": "v1",
         "presentation": {
           "display_name": "Mediux Artwork",
@@ -49,10 +49,7 @@
                 "tmdb",
                 "tvdb"
               ],
-              "image_lookup_provider_ids": [
-                "tmdb",
-                "tvdb"
-              ]
+              "lookup_images": true
             }
           },
           {
@@ -244,19 +241,19 @@
         ]
       },
       "repo_url": "https://github.com/Pukabyte/silo-plugin-mediux",
-      "checksums_url": "https://github.com/Pukabyte/silo-plugin-mediux/releases/download/v0.1.18/checksums.txt",
+      "checksums_url": "https://github.com/Pukabyte/silo-plugin-mediux/releases/download/v0.1.19/checksums.txt",
       "binaries": {
         "linux/amd64": {
-          "url": "https://github.com/Pukabyte/silo-plugin-mediux/releases/download/v0.1.18/plugin-linux-amd64",
-          "checksum": "cfa05f32dbc21b9f8fdcf9b513c36c13d5989fcf322f0f5de93bd110b38290da"
+          "url": "https://github.com/Pukabyte/silo-plugin-mediux/releases/download/v0.1.19/plugin-linux-amd64",
+          "checksum": "3171846f7c8f6729d5d8c1a1b2a68fad10d9e20c4eccecde0207c224c3f8c37c"
         },
         "linux/arm64": {
-          "url": "https://github.com/Pukabyte/silo-plugin-mediux/releases/download/v0.1.18/plugin-linux-arm64",
-          "checksum": "962bfb6cfcee1aafc241e6d3e254f16f2287d7a73dac9edc4abdc6e56b45bad4"
+          "url": "https://github.com/Pukabyte/silo-plugin-mediux/releases/download/v0.1.19/plugin-linux-arm64",
+          "checksum": "7a274190a512182c87316b63f06606df4fb12d559d65434678710b873031c6e5"
         },
         "darwin/arm64": {
-          "url": "https://github.com/Pukabyte/silo-plugin-mediux/releases/download/v0.1.18/plugin-darwin-arm64",
-          "checksum": "5e4d718056c6e2c90fece7421637cab1be0d7ce1dc6ea2e8fc9aecd13743f2d3"
+          "url": "https://github.com/Pukabyte/silo-plugin-mediux/releases/download/v0.1.19/plugin-darwin-arm64",
+          "checksum": "a5a9870e077ff6e381a7335a487b29d13b120d0536f56fa84b5a1a4aea643912"
         }
       }
     }
