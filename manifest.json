@@ -47,10 +47,7 @@
           "tmdb",
           "tvdb"
         ],
-        "image_lookup_provider_ids": [
-          "tmdb",
-          "tvdb"
-        ]
+        "lookup_images": true
       }
     },
     {

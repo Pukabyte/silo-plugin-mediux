@@ -4,7 +4,9 @@
 
 The plugin uses the tagged Silo SDK v0.24.0 and exposes `metadata_provider.v1`, `image_resolver.v1`, and administrator-only `http_routes.v1` capabilities. Silo's native runtime supplies the authenticated user role and persists configuration through its host broker.
 
-TMDB IDs identify Mediux movies and shows. TVDB-only identities are mapped through Mediux's `movies` or `shows` GraphQL filter, then normal lookup bootstraps a `mediux` identity such as `series:82452`. External IDs are declared through `lookup_provider_ids`; `image_lookup_provider_ids` also declares the adapter support needed for galleries. Artwork enrichment does not fabricate textual titles or episode names.
+TMDB IDs identify Mediux movies and shows. TVDB-only identities are mapped through Mediux's `movies` or `shows` GraphQL filter, then normal lookup bootstraps a `mediux` identity such as `series:82452`. External IDs are declared through `lookup_provider_ids`; `lookup_images: true` enables upstream Silo to call `GetImages` by those same keys for item and season galleries and item artwork refreshes (Silo PR #3145, commit `1556ddb`). Automatic season posters still come from `GetSeasons` using the Mediux identity. Artwork enrichment does not fabricate textual titles or episode names.
+
+The optional `silo-image-request-purpose: gallery` header enables complete native picker results independently of automatic best-image selection. Upstream Silo does not send this custom header; without it, `GetImages` follows the configured selection policy, including automatic refreshes. The plugin-owned Artwork Manager provides complete galleries without this host extension. The lookup capability does not suppress refresh calls.
 
 The executable is a plugin runtime, not a standalone HTTP server or library scanner. Silo controls provider chains, refresh/merge rules, image locks, storage, and image delivery.
 
