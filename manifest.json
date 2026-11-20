@@ -1,6 +1,6 @@
 {
   "plugin_id": "community.mediux",
-  "version": "0.1.20",
+  "version": "0.1.21",
   "checksum": "__CHECKSUM__",
   "silo_api_version": "v1",
   "presentation": {
@@ -245,7 +245,7 @@
       "path": "/artwork",
       "access": "admin",
       "navigable": true,
-      "navigation_label": "Artwork Manager",
+      "navigation_label": "Mediux Artwork Manager",
       "navigation_kind": "admin"
     }
   ]

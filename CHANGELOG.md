@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.21
+
+- Name the plugin menu entry and page Mediux Artwork Manager.
+
 ## 0.1.20
 
 - Brand the Artwork Manager and settings with the MediUX mark, dark navy palette, and bundled Baloo 2 typography.

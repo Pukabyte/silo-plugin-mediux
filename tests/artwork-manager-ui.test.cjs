@@ -33,7 +33,7 @@ async function setup(browser,routeName="artwork",width=390){
 async function combinedViews(browser){
  const test=await setup(browser);const{page,writes,errors}=test;
  try{
-  assert.equal(await page.title(),"Artwork Manager");assert.equal(await page.getByRole("heading",{name:"MediUX Artwork Manager",exact:true}).count(),1);
+  assert.equal(await page.title(),"Mediux Artwork Manager");assert.equal(await page.getByRole("heading",{name:"Mediux Artwork Manager",exact:true}).count(),1);
   await page.waitForFunction(()=>document.querySelector(".mediux-mark img")?.naturalWidth>0);
   const brand=await page.evaluate(async()=>{await document.fonts.ready;return [getComputedStyle(document.body).fontFamily,getComputedStyle(document.documentElement).getPropertyValue("--settings-accent").trim(),[...document.fonts].find(f=>f.family.includes("Baloo 2"))?.status]});
   assert.match(brand[0],/Baloo 2/);assert.deepEqual(brand.slice(1),["#945af2","loaded"]);

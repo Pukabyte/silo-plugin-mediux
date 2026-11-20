@@ -35,7 +35,7 @@ changes or server restart are needed.
    key** to a dedicated administrator API key for this Silo instance. Silo
    stores this secret encrypted; the browser never receives it. The plugin
    discovers the host's internal API URL through the SDK.
-2. Open **Artwork Manager**, then its **Collection covers** tab.
+2. Open **Mediux Artwork Manager**, then its **Collection covers** tab.
 3. Choose a collection, search for a Mediux franchise, and preview a poster or
    backdrop. A public image URL may also be pasted directly.
 4. Select **Apply** to assign the remote image using Silo's existing collection
@@ -90,7 +90,7 @@ Silo controls artwork storage and image caching. Your API token stays on the ser
 
 ### Set manager
 
-Open **Artwork Manager** from the plugin menu. Search a Silo movie/show title, choose it and preview its Mediux sets. Click artwork for an enlarged preview and use **Apply image** beneath it, or use **Apply set** to replace matching artwork now and save the set for later refreshes, including season posters and episode title cards. Missing artwork in that set receives no Mediux replacement; manual galleries still show other eligible sets. Removing the preference restores normal ranking. Preferences are shared administrator settings and survive plugin updates.
+Open **Mediux Artwork Manager** from the plugin menu. Search a Silo movie/show title, choose it and preview its Mediux sets. Click artwork for an enlarged preview and use **Apply image** beneath it, or use **Apply set** to replace matching artwork now and save the set for later refreshes, including season posters and episode title cards. Missing artwork in that set receives no Mediux replacement; manual galleries still show other eligible sets. Removing the preference restores normal ranking. Preferences are shared administrator settings and survive plugin updates.
 
 The **Collection covers** tab groups choices by set and supports exact TMDB collection lookup, related franchise discovery from collection members, and a numeric/Mediux set URL. Save a set as a browsing preference, then choose and explicitly apply a poster or backdrop. Saving a preference alone does not replace a cover. Genre/category packs are still not exposed by this API.
 
@@ -99,14 +99,14 @@ This workflow follows AURA's set grouping and saved-selection model, inspected a
 
 ### Immediate replacement (0.1.15)
 
-In **Artwork Manager**, preview artwork by clicking its thumbnail, then use **Apply image** to replace it. **Apply set** replaces matching artwork on the selected title and its existing seasons/episodes, then saves the preferred set. Only existing local targets are changed; missing targets are skipped. Progress and Stop controls let a set operation stop after the current image. A failed or uncertain operation is not automatically retried; completed changes remain applied.
+In **Mediux Artwork Manager**, preview artwork by clicking its thumbnail, then use **Apply image** to replace it. **Apply set** replaces matching artwork on the selected title and its existing seasons/episodes, then saves the preferred set. Only existing local targets are changed; missing targets are skipped. Progress and Stop controls let a set operation stop after the current image. A failed or uncertain operation is not automatically retried; completed changes remain applied.
 
 The plugin passes the remote Mediux HTTPS URL to Silo's official image API. Silo caches and publishes the image immediately, retains the remote URL as its source, and applies its normal manual-image lock. Collection covers continue using the existing remote URL assignment workflow. Removing a preferred set does not undo images already applied.
 
 
 ### Artwork Manager (0.1.16)
 
-Open **Artwork Manager** from the plugin menu. **Movies & shows** and **Collection covers** are tabs in the same window, with each view retaining its state when switching. Existing `/sets` and `/collections` links still open the appropriate manager tab.
+Open **Mediux Artwork Manager** from the plugin menu. **Movies & shows** and **Collection covers** are tabs in the same window, with each view retaining its state when switching. Existing `/sets` and `/collections` links still open the appropriate manager tab.
 
 Click an image to open an enlarged preview; previews never apply artwork. **Apply image** sits beneath each thumbnail and applies only that image. **Apply set** applies the complete matching movie/show set and remembers it, including locally available season/episode targets. The remote Mediux URL remains the source; Silo's existing caching and publication path is unchanged.
 

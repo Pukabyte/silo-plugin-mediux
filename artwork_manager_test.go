@@ -27,7 +27,7 @@ func TestArtworkManagerAccessAndLegacyRoutes(t *testing.T) {
 				t.Fatal(err)
 			}
 		}
-		if !strings.Contains(body, "Artwork Manager") || !strings.Contains(body, "artwork:view") {
+		if !strings.Contains(body, "<title>Mediux Artwork Manager</title>") || !strings.Contains(body, "artwork:view") {
 			t.Fatalf("%s did not render manager shell", path)
 		}
 	}
