@@ -73,11 +73,11 @@ The secret token remains in the native `settings` entry. Public artwork preferen
 
 Routes require the Silo-supplied administrator role. JSON preference writes require a cryptographically random per-process CSRF token, use a strict field allowlist and payload limit, validate choices/creator lists, and serialize saves. A persistence failure leaves active preferences unchanged. The plugin never returns an API token; the page exposes only whether one is configured.
 
-The standalone settings page uses Silo's existing administrator launch flow. Its embedded licensed Outfit font avoids external font fetches. Public theme variables are read without credentials and validated against an allowlist; arbitrary `raw_css` is ignored. Cached readability preferences use Silo's existing owner namespace. Theme failure retains bundled Cinema Dark defaults.
+The standalone settings page uses Silo's existing administrator launch flow. The Artwork Manager and settings share the MediUX palette and the bundled Baloo 2 font and MediUX mark. Cached readability preferences use Silo's existing owner namespace.
 
 ## Validation and release boundaries
 
-Go tests cover native configuration, identity lookup, API decoding, concurrency/cache behavior, artwork selection, references/resolution, creator lookup, administrator access and preference persistence. Browser checks cover search/add/reorder/remove, repeated saves, errors, theme overrides, readability preferences, keyboard focus and mobile overflow.
+Go tests cover native configuration, identity lookup, API decoding, concurrency/cache behavior, artwork selection, references/resolution, creator lookup, administrator access and preference persistence. Browser checks cover search/add/reorder/remove, repeated saves, errors, branding, readability preferences, keyboard focus and mobile overflow.
 
 Releases contain checksum-bearing manifests and binaries for all declared platforms. Linux amd64 has native runtime acceptance; Linux arm64 and macOS arm64 are cross-builds. Production deployment tools, configuration, backups and operational evidence are excluded from source control. A GitHub publication does not register or approve the plugin in Silo's community catalog.
 

@@ -1,6 +1,6 @@
 .PHONY: build test vet check audit dist
 BINARY=plugin
-VERSION ?= 0.1.19
+VERSION ?= 0.1.20
 GO ?= go
 GOFMT ?= $(shell $(GO) env GOROOT)/bin/gofmt
 build:

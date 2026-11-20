@@ -30,7 +30,6 @@ async function setup(browser, options = {}) {
   await page.route("**/*", async (route) => {
     const request = route.request(); const url = new URL(request.url());
     if (url.origin !== origin) return route.abort();
-    if (url.pathname === "/api/v2/theme/admin-css") return route.fulfill({status:200,contentType:"application/json",body:JSON.stringify({vars:{"settings-accent":"#dba444"}})});
     if (url.pathname === mount + "/collections" && request.method() === "GET") return route.fulfill({ status: 200, contentType: "text/html", body: html });
     if (url.pathname === mount + "/ui.css") return route.fulfill({ status: 200, contentType: "text/css", body: sharedCSS });
     if (url.pathname === mount + "/settings/config") return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ csrf: "test-csrf", collection_connection_configured: options.connected !== false }) });
@@ -131,12 +130,12 @@ async function backdropSelectionTargetsBackdrop(browser) {
   } finally {await test.context.close();}
 }
 
-async function themeAndAccessibilityFollowSilo(browser) {
+async function brandingAndReadability(browser) {
   const test=await setup(browser,{accessibility:true});
   try {
     await test.page.waitForFunction(()=>document.documentElement.dataset.textScale==="large",null,{timeout:2000});
     const values=await test.page.evaluate(()=>({weight:document.documentElement.dataset.textWeight,contrast:document.documentElement.dataset.highContrast,accent:getComputedStyle(document.documentElement).getPropertyValue("--settings-accent").trim()}));
-    assert.deepEqual(values,{weight:"strong",contrast:"true",accent:"#dba444"});
+    assert.deepEqual(values,{weight:"strong",contrast:"true",accent:"#945af2"});
   }finally{await test.context.close();}
 }
 
@@ -236,4 +235,4 @@ async function connectionMessage(browser) {
   finally { await test.context.close(); }
 }
 
-(async () => { const executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH; const browser = await chromium.launch({ headless: true, ...(executablePath ? { executablePath } : {}) }); try { await browseAndApply(browser); await collectionPreviewAndIndividualApply(browser); await staleAndSelectionSafety(browser); await externalAndNarrow(browser); await staleSwitchDoesNotOverwrite(browser); await backdropSelectionTargetsBackdrop(browser); await themeAndAccessibilityFollowSilo(browser); await searchSwitchStaysUsable(browser); await delayedFailuresStayWithTheirCollection(browser); await timedOutSaveIsReported(browser); await backReturnsToExistingSiloRoute(browser); await mobileControlGeometry(browser); await groupedSetsAndSavedPreference(browser); await connectionMessage(browser); process.stdout.write("collections UI checks passed\n"); } finally { await browser.close(); } })().catch((error) => { process.stderr.write("collections UI checks failed: " + error.stack + "\n"); process.exitCode = 1; });
+(async () => { const executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH; const browser = await chromium.launch({ headless: true, ...(executablePath ? { executablePath } : {}) }); try { await browseAndApply(browser); await collectionPreviewAndIndividualApply(browser); await staleAndSelectionSafety(browser); await externalAndNarrow(browser); await staleSwitchDoesNotOverwrite(browser); await backdropSelectionTargetsBackdrop(browser); await brandingAndReadability(browser); await searchSwitchStaysUsable(browser); await delayedFailuresStayWithTheirCollection(browser); await timedOutSaveIsReported(browser); await backReturnsToExistingSiloRoute(browser); await mobileControlGeometry(browser); await groupedSetsAndSavedPreference(browser); await connectionMessage(browser); process.stdout.write("collections UI checks passed\n"); } finally { await browser.close(); } })().catch((error) => { process.stderr.write("collections UI checks failed: " + error.stack + "\n"); process.exitCode = 1; });

@@ -65,8 +65,8 @@ func TestArtworkManagerCompilesNamespacedComponents(t *testing.T) {
 	if strings.Contains(body, `id="back"`) || strings.Contains(body, `id="type"`) || strings.Contains(body, `id="collection-list"`) {
 		t.Fatalf("unprefixed component id in rendered page")
 	}
-	if strings.Count(body, `id="mediux-silo-theme"`) != 1 {
-		t.Fatalf("theme bootstrap was not singular")
+	if strings.Count(body, `src="brand/mediux.svg"`) != 1 || !strings.Contains(body, "silo-ui-text-scale") {
+		t.Fatalf("MediUX mark or Silo readability preferences missing")
 	}
 	ids := regexp.MustCompile(`\bid="([^"]+)"`).FindAllStringSubmatch(body, -1)
 	seen := map[string]bool{}

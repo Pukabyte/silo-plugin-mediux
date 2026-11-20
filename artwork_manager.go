@@ -12,6 +12,20 @@ import (
 //go:embed artwork.html
 var artworkTemplate string
 
+//go:embed brand/mediux.svg
+var mediuxLogo []byte
+
+//go:embed brand/baloo-2.woff2
+var mediuxFont []byte
+
+func brandAsset(body []byte, contentType string) *pluginv1.HandleHTTPResponse {
+	response := settingsResponse(200, body, contentType)
+	response.Headers["Cache-Control"] = "private, max-age=86400"
+	response.Headers["Content-Security-Policy"] = "default-src 'none'; sandbox"
+	response.Headers["X-Content-Type-Options"] = "nosniff"
+	return response
+}
+
 var (
 	bodyRE          = regexp.MustCompile(`(?is)<body[^>]*>(.*)</body>`)
 	mainRE          = regexp.MustCompile(`(?is)<main[^>]*>(.*)</main>`)
@@ -126,7 +140,7 @@ func scopeArtworkSelector(selector, root string) string {
 	return strings.Join(items, ",")
 }
 
-func artworkThemeBootstrap(page []byte) string {
+func artworkReadabilityBootstrap(page []byte) string {
 	head := ""
 	if match := headRE.FindStringSubmatch(string(page)); len(match) == 2 {
 		head = match[1]
@@ -143,7 +157,7 @@ func renderArtworkManager() []byte {
 	media := extractArtworkComponent(setsPage, "media-", "#media-view")
 	collections := extractArtworkComponent(collectionsPage, "collections-", "#collections-view")
 	page := strings.NewReplacer(
-		"{{THEME}}", artworkThemeBootstrap(setsPage),
+		"{{READABILITY}}", artworkReadabilityBootstrap(setsPage),
 		"{{MEDIA_STYLE}}", media.style, "{{COLLECTIONS_STYLE}}", collections.style,
 		"{{MEDIA_CONTENT}}", media.content, "{{COLLECTIONS_CONTENT}}", collections.content,
 		"{{MEDIA_SCRIPT}}", "<script>"+media.script+"</script>",

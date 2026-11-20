@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.20
+
+- Brand the Artwork Manager and settings with the MediUX mark, dark navy palette, and bundled Baloo 2 typography.
+
 ## 0.1.19
 
 - Use upstream Silo's `lookup_images: true` with the existing TMDB/TVDB `lookup_provider_ids`, replacing the custom `image_lookup_provider_ids` declaration. This enables image lookup on hosts with Silo PR #3145 without a custom capability patch. Refresh selection and optional gallery-purpose handling remain unchanged.

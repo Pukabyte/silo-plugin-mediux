@@ -93,6 +93,14 @@ func (s *server) Handle(ctx context.Context, r *pluginv1.HandleHTTPRequest) (*pl
 	if r.GetHeaders()["X-Silo-User-Role"] != "admin" {
 		return respond(403, map[string]string{"error": "Administrator access required"})
 	}
+	if r.GetMethod() == "GET" {
+		switch r.GetPath() {
+		case "/brand/mediux.svg":
+			return brandAsset(mediuxLogo, "image/svg+xml"), nil
+		case "/brand/baloo-2.woff2":
+			return brandAsset(mediuxFont, "font/woff2"), nil
+		}
+	}
 	if r.GetPath() == "/artwork" {
 		return s.handleArtworkManager(ctx, r)
 	}

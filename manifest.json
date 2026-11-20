@@ -1,6 +1,6 @@
 {
   "plugin_id": "community.mediux",
-  "version": "0.1.19",
+  "version": "0.1.20",
   "checksum": "__CHECKSUM__",
   "silo_api_version": "v1",
   "presentation": {
@@ -147,6 +147,18 @@
       "path": "/collections",
       "access": "admin",
       "navigable": false
+    },
+    {
+      "id": "brand-font",
+      "method": "GET",
+      "path": "/brand/baloo-2.woff2",
+      "access": "admin"
+    },
+    {
+      "id": "brand-logo",
+      "method": "GET",
+      "path": "/brand/mediux.svg",
+      "access": "admin"
     },
     {
       "id": "collection-manager-style",

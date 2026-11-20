@@ -85,7 +85,7 @@ Silo controls artwork storage and image caching. Your API token stays on the ser
 
 [Report an issue](https://github.com/Pukabyte/silo-plugin-mediux/issues). For development, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
-[AGPL-3.0-or-later](LICENSE). Embedded Outfit font: [SIL OFL](OFL-Outfit.txt). Independently maintained; not affiliated with Mediux or Silo.
+[AGPL-3.0-or-later](LICENSE). Bundled Baloo 2 font: [SIL OFL](OFL-Baloo2.txt). Independently maintained; not affiliated with Mediux or Silo.
 
 
 ### Set manager

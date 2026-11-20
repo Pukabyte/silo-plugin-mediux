@@ -38,7 +38,6 @@ async function setupPage(browser, options = {}) {
   const page = await context.newPage();
   const writes = [];
   const configReads = [];
-  const themeRequests = [];
   let configStatus = options.configStatus || 200;
   let saveStatus = options.saveStatus || 200;
   let saveBody = options.saveBody || baseConfig();
@@ -50,9 +49,8 @@ async function setupPage(browser, options = {}) {
     if (url.pathname === "/settings" && request.method() === "GET") {
       return route.fulfill({ status: 200, contentType: "text/html", body: options.html || html });
     }
-    if (url.pathname === "/api/v2/theme/admin-css" && request.method() === "GET") {
-      themeRequests.push(request.headers());
-      return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(options.theme || {}) });
+    if (url.pathname === "/brand/mediux.svg" || url.pathname === "/brand/baloo-2.woff2") {
+      return route.fulfill({ path: path.join(root, url.pathname.slice(1)) });
     }
     if (url.pathname === "/settings/config" && request.method() === "GET") {
       configReads.push(config.csrf);
@@ -73,7 +71,7 @@ async function setupPage(browser, options = {}) {
     return route.fulfill({ status: 404, contentType: "text/plain", body: "not found" });
   });
   await page.goto(origin + "/settings");
-  return { context, page, writes, configReads, themeRequests, setConfigStatus: (value) => { configStatus = value; }, setSaveStatus: (value) => { saveStatus = value; }, setSaveBody: (value) => { saveBody = value; } };
+  return { context, page, writes, configReads, setConfigStatus: (value) => { configStatus = value; }, setSaveStatus: (value) => { saveStatus = value; }, setSaveBody: (value) => { saveBody = value; } };
 }
 
 async function normalFlow(browser) {
@@ -123,52 +121,25 @@ function normalizedCustomProperty(value) {
   return value.trim().toLowerCase().replaceAll(" ", "");
 }
 
-async function cinemaDarkTheme(browser) {
+async function mediuxBranding(browser) {
   const defaults = await setupPage(browser, { colorScheme: "light" });
   try {
-    await defaults.page.waitForFunction(() => document.getElementById("status").textContent === "");
-    const styles = await defaults.page.evaluate(() => {
+    await defaults.page.waitForFunction(() => document.querySelector(".mediux-mark img")?.naturalWidth > 0);
+    const styles = await defaults.page.evaluate(async () => {
+      await document.fonts.ready;
       const root = getComputedStyle(document.documentElement);
       return {
         background: root.getPropertyValue("--background"),
-        foreground: root.getPropertyValue("--foreground"),
-        card: root.getPropertyValue("--card"),
-        fontBody: root.getPropertyValue("--font-body"),
+        accent: root.getPropertyValue("--settings-accent"),
         bodyFont: getComputedStyle(document.body).fontFamily,
-        outfitReady: document.fonts.check("16px Outfit"),
+        fontStatus: [...document.fonts].find(face => face.family.includes("Baloo 2"))?.status,
       };
     });
-    assert.equal(normalizedCustomProperty(styles.background), "#141417", "light OS preference changed Silo Cinema Dark background");
-    assert.equal(normalizedCustomProperty(styles.foreground), "#e8e8ec", "light OS preference changed Silo Cinema Dark foreground");
-    assert.equal(normalizedCustomProperty(styles.card), "#1c1c20", "light OS preference changed Silo Cinema Dark card");
-    ensure(styles.fontBody.includes("Outfit"), "Outfit is not the body font token");
-    ensure(styles.bodyFont.includes("Outfit"), "Outfit is not applied to the page body");
-    ensure(styles.outfitReady, "Outfit font was not loaded");
-    ensure(defaults.themeRequests.length === 1, "Silo public admin theme stylesheet was not requested");
-    assert.equal(defaults.themeRequests[0].cookie, undefined, "public theme stylesheet sent private cookies");
+    assert.equal(normalizedCustomProperty(styles.background), "hsl(22471.4%4.1%)");
+    assert.equal(normalizedCustomProperty(styles.accent), "#945af2");
+    assert.match(styles.bodyFont, /Baloo 2/);
+    assert.equal(styles.fontStatus, "loaded");
   } finally { await defaults.context.close(); }
-
-  const themed = await setupPage(browser, { theme: { vars: JSON.stringify({ background: "#010203", foreground: "#f1e2d3", card: "#111213", "not-a-silo-token": "#ffffff" }), raw_css: "" } });
-  try {
-    await themed.page.waitForFunction(() => document.getElementById("status").textContent === "");
-    await themed.page.waitForFunction(() => getComputedStyle(document.documentElement).getPropertyValue("--background").trim() === "#010203");
-    const styles = await themed.page.evaluate(() => {
-      const root = getComputedStyle(document.documentElement);
-      return {
-        background: root.getPropertyValue("--background"),
-        foreground: root.getPropertyValue("--foreground"),
-        card: root.getPropertyValue("--card"),
-        themedStyle: document.getElementById("mediux-silo-theme")?.textContent || "",
-      };
-    });
-    assert.equal(normalizedCustomProperty(styles.background), "#010203", "safe background override was not applied");
-    assert.equal(normalizedCustomProperty(styles.foreground), "#f1e2d3", "safe foreground override was not applied");
-    assert.equal(normalizedCustomProperty(styles.card), "#111213", "safe card override was not applied");
-    ensure(styles.themedStyle.includes("--background:#010203"), "safe overrides were not isolated in the Mediux theme style");
-    ensure(!styles.themedStyle.includes("not-a-silo-token"), "theme accepted a non-whitelisted token");
-    ensure(themed.themeRequests.length === 1, "theme override endpoint was not requested once");
-    assert.equal(themed.themeRequests[0].cookie, undefined, "theme override request sent private cookies");
-  } finally { await themed.context.close(); }
 
   const readability = await setupPage(browser);
   try {
@@ -251,11 +222,12 @@ async function mobile(browser) {
 }
 
 (async () => {
-  const browser = await chromium.launch({ headless: true });
+  const executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
+  const browser = await chromium.launch({ headless: true, ...(executablePath ? { executablePath } : {}) });
   try {
     await normalFlow(browser);
     await authErrors(browser);
-    await cinemaDarkTheme(browser);
+    await mediuxBranding(browser);
     await focusVisibility(browser);
     await mobile(browser);
     await screenshots(browser);

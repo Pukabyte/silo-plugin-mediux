@@ -10,8 +10,9 @@ async function setup(browser,routeName="artwork",width=390){
  await page.route("**/*",async route=>{const r=route.request(),u=new URL(r.url());const json=(body)=>route.fulfill({status:200,contentType:"application/json",body:JSON.stringify(body)});
   if(u.hostname==="images.example")return route.fulfill({status:200,contentType:"image/svg+xml",body:'<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1500"><rect width="100%" height="100%" fill="#453964"/><text x="500" y="750" text-anchor="middle" fill="white" font-size="80">Artwork</text></svg>'});
   if(u.origin!==origin)return route.abort();
-  if(u.pathname==="/api/v2/theme/admin-css")return json({vars:{"settings-accent":"#b9a6ef"}});
   if(["/artwork","/sets","/collections"].some(p=>u.pathname===mount+p))return route.fulfill({status:200,contentType:"text/html",body:html});
+  if(u.pathname===mount+"/brand/mediux.svg")return route.fulfill({path:path.join(root,"brand/mediux.svg")});
+  if(u.pathname===mount+"/brand/baloo-2.woff2")return route.fulfill({path:path.join(root,"brand/baloo-2.woff2")});
   if(u.pathname===mount+"/ui.css")return route.fulfill({status:200,contentType:"text/css",body:css});
   if(r.method()!=="GET")writes.push({path:u.pathname,body:JSON.parse(r.postData())});
   if(u.pathname===mount+"/sets/preferences"){if(r.method()==="PUT"){const b=JSON.parse(r.postData());if(b.set_id)bindings[b.type+":"+b.id]=b.set_id;else delete bindings[b.type+":"+b.id]}return json({csrf:"csrf",bindings})}
@@ -32,7 +33,11 @@ async function setup(browser,routeName="artwork",width=390){
 async function combinedViews(browser){
  const test=await setup(browser);const{page,writes,errors}=test;
  try{
-  assert.equal(await page.title(),"Artwork Manager");assert.equal(await page.getByRole("heading",{name:"Artwork Manager",exact:true}).count(),1);
+  assert.equal(await page.title(),"Artwork Manager");assert.equal(await page.getByRole("heading",{name:"MediUX Artwork Manager",exact:true}).count(),1);
+  await page.waitForFunction(()=>document.querySelector(".mediux-mark img")?.naturalWidth>0);
+  const brand=await page.evaluate(async()=>{await document.fonts.ready;return [getComputedStyle(document.body).fontFamily,getComputedStyle(document.documentElement).getPropertyValue("--settings-accent").trim(),[...document.fonts].find(f=>f.family.includes("Baloo 2"))?.status]});
+  assert.match(brand[0],/Baloo 2/);assert.deepEqual(brand.slice(1),["#945af2","loaded"]);
+
   const duplicateIDs=await page.evaluate(()=>{const seen=new Set();return[...document.querySelectorAll("[id]")].map(el=>el.id).filter(id=>{if(seen.has(id))return true;seen.add(id);return false})});assert.deepEqual(duplicateIDs,[]);
   await page.locator("#media-title-query").fill("Marvel");await page.locator("#media-find").click();await page.getByRole("button",{name:/Marvel Movie/}).click();
   const mediaItem=page.locator("#media-results .art-item").first();await mediaItem.waitFor();

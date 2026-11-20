@@ -21,7 +21,6 @@ async function setup(browser, options={}) {
     const r=route.request(),u=new URL(r.url());
     const json=(body,status=200)=>route.fulfill({status,contentType:"application/json",body:JSON.stringify(body)});
     if(u.hostname==="images.example"){const wide=u.pathname.includes("logo")?[900,300]:u.pathname.includes("backdrop")?[1600,900]:[1000,1500];return route.fulfill({status:200,contentType:"image/svg+xml",body:`<svg xmlns="http://www.w3.org/2000/svg" width="${wide[0]}" height="${wide[1]}" viewBox="0 0 ${wide[0]} ${wide[1]}"><rect width="100%" height="100%" fill="#3d3559"/><text x="50%" y="50%" text-anchor="middle" fill="#fff" font-size="50">Artwork</text></svg>`})}if(u.origin!==origin)return route.abort();
-    if(u.pathname==="/api/v2/theme/admin-css")return json({});
     if(u.pathname===mount+"/sets")return route.fulfill({status:200,contentType:"text/html",body:html});
     if(u.pathname===mount+"/ui.css")return route.fulfill({status:200,contentType:"text/css",body:sharedCSS});
     if(u.pathname===mount+"/sets/preferences") {

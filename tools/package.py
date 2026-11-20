@@ -53,7 +53,7 @@ def main():
         with zipfile.ZipFile(output / filename, 'w') as archive:
             archive_entry(archive, 'manifest.json', encoded, 0o100644)
             archive_entry(archive, 'plugin', data, 0o100755)
-            for license_file in ('LICENSE', 'OFL-Outfit.txt'):
+            for license_file in ('LICENSE', 'OFL-Baloo2.txt'):
                 archive_entry(archive, license_file, (ROOT / license_file).read_bytes(), 0o100644)
         checksums.append(f'{checksum}  {binary.name}')
         checksums.append(f'{hashlib.sha256((output / filename).read_bytes()).hexdigest()}  {filename}')
